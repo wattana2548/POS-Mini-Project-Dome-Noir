@@ -77,20 +77,48 @@
         width: 100%;
         max-width: 300px;
         aspect-ratio: 1;
-        background: rgba(0,0,0,0.2);
+        background: rgba(0,0,0,0.15);
         border: 2px dashed var(--glass-border);
-        border-radius: 20px;
+        border-radius: 24px;
         margin-top: 15px;
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .preview-container:hover {
+        border-color: var(--cafe-gold);
+        background: rgba(230, 194, 122, 0.05);
+        transform: scale(1.02);
     }
 
     .preview-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        z-index: 1;
+    }
+
+    .preview-placeholder {
+        text-align: center;
+        color: #666;
+        transition: all 0.3s ease;
+        z-index: 0;
+        position: absolute;
+    }
+
+    .preview-container:hover .preview-placeholder {
+        color: var(--cafe-gold);
+    }
+
+    .preview-placeholder i {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        display: block;
     }
 
     .btn-save {
@@ -170,9 +198,13 @@
 
                     <div class="col-md-5">
                         <label class="form-label">รูปภาพสินค้า</label>
-                        <input type="file" name="image" class="form-control border-0 p-0" onchange="previewImage(event)" style="background:transparent !important">
-                        <div class="preview-container">
-                            <img id="preview" class="preview-img" src="./images/products/<%= product.image %>" alt="<%= product.image %>">
+                        <input type="file" id="imageInput" name="image" class="d-none" onchange="previewImage(event)" accept="image/*">
+                        <div class="preview-container" onclick="document.getElementById('imageInput').click()">
+                            <div id="placeholder" class="preview-placeholder" style="display: none;">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <div class="small fw-bold">คลิกเพื่อเปลี่ยนรูปภาพ</div>
+                            </div>
+                            <img id="preview" class="preview-img" src="/images/products/<%= product.image %>" alt="<%= product.image %>">
                         </div>
                         <div class="text-muted small mt-2 text-center">ไฟล์ปัจจุบัน: <%= product.image %></div>
                     </div>
@@ -193,8 +225,13 @@
     <script>
         function previewImage(event) {
             const reader = new FileReader();
+            const preview = document.getElementById("preview");
+            const placeholder = document.getElementById("placeholder");
+            
             reader.onload = function () {
-                document.getElementById("preview").src = reader.result;
+                preview.src = reader.result;
+                preview.style.display = "block";
+                placeholder.style.display = "none";
             }
             if (event.target.files[0]) {
                 reader.readAsDataURL(event.target.files[0]);
