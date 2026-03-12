@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<%- include('../partials/head',{ title:'Employee Management | Dome Noir' }) %>
+
+<style>
+    :root {
+        --cafe-gold: #E6C27A;
+        --cafe-dark-bg: #0d0d0d;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--cafe-dark-bg);
+        padding-top: 100px;
+        color: #eee;
+    }
+
+    .manage-header {
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .section-box {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 35px;
+        margin-bottom: 30px;
+    }
+
+    .premium-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+    .premium-table th {
+        color: #666;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        padding: 15px 25px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .premium-table td {
+        background: rgba(255, 255, 255, 0.02);
+        padding: 20px 25px;
+        vertical-align: middle;
+        color: #ccc;
+        font-size: 0.95rem;
+    }
+
+    .premium-table tr td:first-child { border-radius: 15px 0 0 15px; }
+    .premium-table tr td:last-child { border-radius: 0 15px 15px 0; }
+
+    .premium-table tr:hover td {
+        background: rgba(255, 255, 255, 0.04);
+        color: #fff;
+    }
+
+    .role-badge {
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .badge-admin { background: rgba(248, 113, 113, 0.1); color: #f87171; }
+    .badge-employee { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
+
+    .btn-edit { 
+        background: rgba(230, 194, 122, 0.05); 
+        color: var(--cafe-gold); 
+        border: 1px solid rgba(230, 194, 122, 0.2) !important;
+        border-radius: 10px;
+    }
+    .btn-edit:hover { 
+        background: var(--cafe-gold); 
+        color: #000; 
+        border-color: var(--cafe-gold) !important;
+        box-shadow: 0 4px 15px rgba(230, 194, 122, 0.2);
+    }
+
+    .btn-delete { 
+        background: rgba(248, 113, 113, 0.05); 
+        color: #f87171; 
+        border: 1px solid rgba(248, 113, 113, 0.2) !important;
+        border-radius: 10px;
+        text-decoration: none !important;
+    }
+    .btn-delete:hover { 
+        background: #ef4444; 
+        color: #fff; 
+        border-color: #ef4444 !important;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-action {
+        padding: 8px 18px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 80px;
+    }
+
+    .btn-add {
+        background: var(--cafe-gold);
+        color: #000;
+        border-radius: 12px;
+        padding: 12px 25px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        text-decoration: none !important;
+    }
+
+    .btn-add:hover {
+        background: #f0d49a;
+        transform: translateY(-2px);
+    }
+</style>
+
+<body>
+<%- include('../navbar', { user: user }) %>
+
+<div class="container mb-5">
+    <div class="manage-header d-flex justify-content-between align-items-end">
+        <div>
+            <div class="welcome-text">สารบบบุคลากร</div>
+            <h2 class="text-light font-weight-bold m-0 mt-1">การบริหารจัดการบุคลากร</h2>
+        </div>
+        <a href="/members/addEmployee" class="btn-add">
+            เพิ่มบุคลากรใหม่
+        </a>
+    </div>
+
+    <div class="section-box">
+        <div class="table-responsive">
+            <table class="premium-table">
+                <thead>
+                    <tr>
+                        <th class="text-left" style="padding-left: 25px;">#</th>
+                        <th class="text-left">ชื่อ-นามสกุล / ชื่อเรียก</th>
+                        <th class="text-left">ข้อมูลการเข้าถึง</th>
+                        <th class="text-center">ระดับสิทธิ์</th>
+                        <th class="text-center">การจัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% members.forEach((m, index) => { %>
+                    <tr>
+                        <td class="text-left text-muted" style="font-size: 0.8rem;"><%= String(index + 1).padStart(2, '0') %></td>
+                        <td class="text-left font-weight-bold text-light"><%= m.name %></td>
+                        <td class="text-left">
+                            <div style="font-size: 0.9rem;"><%= m.email %></div>
+                            <div class="text-muted small"><%= m.phone || 'ไม่ได้ระบุข้อมูลติดต่อ' %></div>
+                        </td>
+                        <td class="text-center">
+                            <% if(m.role === 'admin'){ %>
+                                <span class="role-badge badge-admin">Admin</span>
+                            <% } else { %>
+                                <span class="role-badge badge-employee">Employee</span>
+                            <% } %>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-2" style="gap: 12px;">
+                                <a href="/members/editMember/<%= m._id %>" class="btn-action btn-edit" title="Edit Profile">
+                                    แก้ไข
+                                </a>
+                                <% if(m.role !== 'admin'){ %>
+                                    <a href="/members/deleteMember/<%= m._id %>" class="btn-action btn-delete" 
+                                       onclick="return confirm('กดยืนยันเพื่อเพิกถอนสิทธิ์การเข้าใช้งานของบุคลากรท่านนี้?')" title="Delete Member">
+                                        ลบ
+                                    </a>
+                                <% } else { %>
+                                    <span class="btn-action opacity-20" title="Protected Access">จำกัดสิทธิ์</span>
+                                <% } %>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

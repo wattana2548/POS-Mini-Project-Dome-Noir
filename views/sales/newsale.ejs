@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<%- include('../partials/head.ejs', { title:'ระบบจัดการการขาย | Dome Noir' }) %>
+
+<style>
+    :root {
+        --cafe-gold: #E6C27A;
+        --cafe-dark-bg: #0d0d0d;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--cafe-dark-bg);
+        padding-top: 100px;
+        color: #eee;
+        min-height: 100vh;
+        background: linear-gradient(rgba(13,13,13,0.95), rgba(13,13,13,0.95)), 
+                    url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=2000');
+        background-size: cover;
+        background-attachment: fixed;
+    }
+
+    .pos-container {
+        display: flex;
+        gap: 30px;
+        margin-top: 10px;
+        align-items: flex-start;
+    }
+
+    /* Menu Section */
+    .menu-section {
+        flex: 1.5;
+        background: rgba(25, 25, 25, 0.4);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 30px;
+    }
+
+    /* Checkout Section */
+    .checkout-section {
+        flex: 1;
+        position: sticky;
+        top: 100px;
+    }
+
+    .checkout-card {
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(30px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        color: var(--cafe-gold);
+        font-size: 1.4rem;
+        letter-spacing: 1px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* POS Grid */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 15px;
+        max-height: 650px;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+    .product-grid::-webkit-scrollbar { width: 4px; }
+    .product-grid::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+    #posProductMenu { display: flex; flex-wrap: wrap; } /* Enable flex for ordering */
+    .pos-card { flex: 0 0 calc(25% - 12px); margin: 6px; } /* Support flex order */
+    @media (max-width: 768px) { .pos-card { flex: 0 0 calc(33.333% - 10px); } }
+
+    .pos-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--glass-border);
+        border-radius: 18px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        padding-bottom: 12px;
+    }
+
+    .pos-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(230, 194, 122, 0.3);
+    }
+
+    .pos-card img {
+        width: 100%;
+        height: 110px;
+        object-fit: cover;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .pos-card-info { padding: 10px 5px; }
+    .pos-card-title { font-size: 0.8rem; font-weight: 500; color: #fff; margin-bottom: 5px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pos-card-price { color: var(--cafe-gold); font-weight: 600; font-size: 0.9rem; }
+
+    /* Cart Table */
+    .cart-table th { 
+        color: var(--cafe-gold); 
+        font-size: 0.7rem; 
+        text-transform: uppercase; 
+        letter-spacing: 1.5px; 
+        border-bottom: 2px solid rgba(230, 194, 122, 0.1); 
+        padding: 15px 10px;
+        font-weight: 700;
+        opacity: 0.8;
+    }
+    .cart-table td { 
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03); 
+        padding: 15px 10px; 
+        vertical-align: middle; 
+        color: #eee; 
+    }
+
+    .item-thumb { 
+        width: 45px; 
+        height: 45px; 
+        border-radius: 12px; 
+        object-fit: cover; 
+        border: 1px solid var(--glass-border);
+    }
+
+    .qty-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 4px 10px;
+    }
+
+    .btn-qty {
+        width: 24px;
+        height: 24px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-qty:hover { 
+        background: var(--cafe-gold); 
+        color: #000; 
+        border-color: var(--cafe-gold);
+        transform: scale(1.1);
+    }
+
+    .btn-remove-item {
+        color: #f87171;
+        opacity: 0.5;
+        transition: all 0.3s;
+        cursor: pointer;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+        text-decoration: none !important;
+    }
+    .btn-remove-item:hover {
+        opacity: 1;
+        color: #ef4444;
+    }
+
+    .sweetness-label {
+        font-size: 0.65rem;
+        color: #666;
+        margin-top: 4px;
+        display: block;
+    }
+
+    /* Forms in POS */
+    .form-control, .form-select {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid var(--glass-border) !important;
+        color: #fff !important;
+        border-radius: 12px;
+        font-size: 0.85rem;
+    }
+
+    .btn-pos-cat {
+        border-radius: 20px;
+        padding: 6px 15px;
+        font-size: 0.75rem;
+        background: transparent;
+        color: #888;
+        border: 1px solid var(--glass-border);
+        margin-right: 5px;
+        margin-bottom: 8px;
+        transition: all 0.3s;
+    }
+    .btn-pos-cat.active {
+        background: rgba(230, 194, 122, 0.15);
+        color: var(--cafe-gold);
+        border-color: var(--cafe-gold);
+    }
+
+    .payment-summary {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 18px;
+        padding: 20px;
+        margin-top: 25px;
+        border: 1px solid var(--glass-border);
+    }
+
+    .summary-total {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--cafe-gold);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px dashed var(--glass-border);
+    }
+</style>
+
+<body>
+
+    <%- include('../navbar', { user:user }) %>
+
+    <div class="container mb-5">
+        <form action="/sales/insert" method="POST" id="saleForm">
+            <div class="pos-container">
+                
+                <!-- MENU SECTION -->
+                <div class="menu-section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="section-title mb-0" id="posMenuTitle">รายการสินค้า</div>
+                        <div style="width: 280px;">
+                            <input type="text" id="posSearchInput" placeholder="ค้นหาเมนู..." 
+                                   class="form-control" onkeyup="filterPOSMenu()">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="btn btn-pos-cat active" data-category="เมนูทั้งหมด" onclick="setPOSCategory('เมนูทั้งหมด')">เมนูทั้งหมด</button>
+                        <button type="button" class="btn btn-pos-cat" data-category="เมนูยอดนิยม" onclick="setPOSCategory('เมนูยอดนิยม')">เมนูยอดนิยม</button>
+                        <button type="button" class="btn btn-pos-cat" data-category="กาแฟ" onclick="setPOSCategory('กาแฟ')">กาแฟ</button>
+                        <button type="button" class="btn btn-pos-cat" data-category="ชา" onclick="setPOSCategory('ชา')">ชา</button>
+                        <button type="button" class="btn btn-pos-cat" data-category="ช็อกโกแลตและนม" onclick="setPOSCategory('ช็อกโกแลตและนม')">ช็อกโกแลตและนม</button>
+                        <button type="button" class="btn btn-pos-cat" data-category="โซดา" onclick="setPOSCategory('โซดา')">โซดา</button>
+                        <button type="button" class="btn btn-pos-cat" data-category="เมนูปั่น" onclick="setPOSCategory('เมนูปั่น')">เมนูปั่น</button>
+                        <button type="button" class="btn btn-pos-cat" data-category="เบเกอรี่" onclick="setPOSCategory('เบเกอรี่')">เบเกอรี่</button>
+                    </div>
+
+                    <div class="product-grid" id="posProductMenu">
+                        <% products.forEach(product=>{ %>
+                        <div class="pos-card menu-item" id="menu-item-<%= product._id %>" 
+                             data-category="<%= product.category %>" 
+                             data-popular="<%= popularIds.includes(product._id.toString()) ? 'true' : 'false' %>"
+                             data-id="<%= product._id %>"
+                             data-name="<%= product.name %>"
+                             data-image="<%= product.image %>"
+                             data-price="<%= product.price %>"
+                             onclick="handleItemClick(this)">
+                            
+                            <img src="/images/products/<%= product.image %>">
+                            <div class="pos-card-info">
+                                <span class="pos-card-title"><%= product.name %></span>
+                                <span class="pos-card-price">฿<%= product.price.toLocaleString() %></span>
+                                <% if(popularIds.includes(product._id.toString())){ %>
+                                    <span class="popular-rank-tag" style="display:none;"><%= popularIds.indexOf(product._id.toString()) %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <!-- CHECKOUT SECTION -->
+                <div class="checkout-section">
+                    <div class="checkout-card">
+                        <div class="section-title">
+                            <span>รายการที่เลือก</span>
+                            <span id="cartCountBadge" class="badge badge-warning rounded-pill" style="font-size: 0.7rem; background: var(--cafe-gold); color: #000; padding: 4px 10px;">0 รายการ</span>
+                        </div>
+
+                        <div style="max-height: 250px; overflow-y: auto; margin-bottom: 25px;">
+                            <table class="table table-dark cart-table m-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-left">รายการ</th>
+                                        <th width="100" class="text-center">จำนวน</th>
+                                        <th width="90" class="text-right">ราคารวม</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cartBody">
+                                    <!-- Items injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">เลือกสมาชิก</label>
+                            <select name="member" id="memberSelect" class="form-select">
+                                <option value="">ลูกค้าทั่วไป</option>
+                                <% members.forEach(member=>{ %>
+                                <option value="<%= member._id %>" data-point="<%= member.point %>">
+                                    <%= member.name %> (<%= member.phone %>)
+                                </option>
+                                <% }) %>
+                            </select>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label">คะแนนสะสม</label>
+                                <input type="text" id="memberPoint" class="form-control" value="0" readonly style="opacity: 0.6;">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">แลกคะแนน</label>
+                                <input type="number" id="usePoint" name="usePoint" value="0" class="form-control" onchange="calculateTotal()">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">รหัสโปรโมชัน</label>
+                            <div class="input-group">
+                                <input type="text" id="promoCode" class="form-control" placeholder="ใส่รหัสโปรโมชัน...">
+                                <button class="btn btn-outline-warning" type="button" onclick="calculateTotal()" style="border-radius: 0 12px 12px 0;">ใช้งาน</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">ช่องทางชำระเงิน</label>
+                            <select name="paymentMethod" class="form-select">
+                                <option value="เงินสด">เงินสด</option>
+                                <option value="QR Code">QR / กระเป๋าเงินดิจิทัล</option>
+                                <option value="โอน">โอนผ่านธนาคาร</option>
+                            </select>
+                        </div>
+
+                        <div id="discountDetails" class="mb-3 px-3 py-2 rounded-lg" style="font-size: 0.75rem; background: rgba(230,194,122,0.1); color: var(--cafe-gold); border-radius: 12px;">
+                            <!-- Discount list -->
+                        </div>
+
+                        <div class="payment-summary">
+                            <div class="d-flex justify-content-between small text-muted mb-2">
+                                <span>ยอดรวมสินค้า</span>
+                                <span id="subtotalDisplay">฿0</span>
+                            </div>
+                            <div class="d-flex justify-content-between small text-danger mb-0">
+                                <span>ส่วนลดโปรโมชัน</span>
+                                <span id="discountDisplay">-฿0</span>
+                            </div>
+                            <div class="summary-total">
+                                <span style="font-size: 1rem; color: #666; font-weight: 500;">ยอดชำระสุทธิ</span>
+                                ฿<span id="totalPrice">0</span>
+                            </div>
+                        </div>
+
+                        <div class="text-info small text-end mt-3 mb-4">
+                            คะแนนที่จะได้รับ: <span id="pointEarn" class="font-weight-bold">0</span>
+                        </div>
+
+                        <input type="hidden" name="items" id="itemsInput">
+                        <input type="hidden" name="totalPrice" id="totalInput">
+                        <input type="hidden" name="discount" id="discount" value="0">
+
+                        <button type="submit" class="btn btn-warning w-100 py-3 font-weight-bold" style="border-radius: 15px; letter-spacing: 1px; color: #000; background: var(--cafe-gold);">
+                            บันทึกการขายสินค้า
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        /* Logic same as before but refined for better UX */
+        let cart = [];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const autoAddId = urlParams.get('product_id');
+            if (autoAddId) {
+                const itemObj = document.getElementById("menu-item-" + autoAddId);
+                if (itemObj) {
+                    window.history.replaceState(null, '', window.location.pathname);
+                    itemObj.click();
+                }
+            }
+        });
+
+        function handleItemClick(el) {
+            const d = el.dataset;
+            addToCart(d.id, d.name, d.image, parseFloat(d.price), d.category);
+        }
+
+        function addToCart(id, name, image, price, category) {
+            let found = cart.find(item => item.product === id);
+            if (found) {
+                found.quantity++;
+            } else {
+                cart.push({ 
+                    product: id, 
+                    productName: name, 
+                    productImage: image, 
+                    price: price, 
+                    category: category,
+                    quantity: 1, 
+                    sweetness: (category === 'เบเกอรี่' || category === 'อื่นๆ') ? "N/A" : "" 
+                });
+            }
+            renderCart();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+
+        function changeQty(index, amount) {
+            cart[index].quantity += amount;
+            if (cart[index].quantity <= 0) cart.splice(index, 1);
+            renderCart();
+        }
+
+        function updateSweetness(index, val) {
+            cart[index].sweetness = val;
+            calculateTotal();
+        }
+
+        function renderCart() {
+            const body = document.getElementById("cartBody");
+            body.innerHTML = "";
+            cart.forEach((item, index) => {
+                const isDrink = !(item.category === 'เบเกอรี่' || item.category === 'อื่นๆ');
+                body.innerHTML += `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="/images/products/${item.productImage}" class="item-thumb mr-3">
+                                <div>
+                                    <div class="small font-weight-bold text-light mb-1">${item.productName}</div>
+                                    ${isDrink ? `
+                                    <select class="form-select form-select-sm p-0 px-2" 
+                                            style="font-size: 0.65rem; width: auto; height: 22px; border-radius: 6px; ${item.sweetness === '' ? 'border: 1px solid #f87171 !important;' : ''}"
+                                            onchange="updateSweetness(${index}, this.value)">
+                                        <option value="" ${item.sweetness === '' ? 'selected' : ''} disabled>เลือกความหวาน</option>
+                                        <option value="0%" ${item.sweetness === '0%' ? 'selected' : ''}>หวาน 0%</option>
+                                        <option value="25%" ${item.sweetness === '25%' ? 'selected' : ''}>หวาน 25%</option>
+                                        <option value="50%" ${item.sweetness === '50%' ? 'selected' : ''}>หวาน 50%</option>
+                                        <option value="75%" ${item.sweetness === '75%' ? 'selected' : ''}>หวาน 75%</option>
+                                        <option value="100%" ${item.sweetness === '100%' ? 'selected' : ''}>หวาน 100%</option>
+                                    </select>` : '<span class="text-muted" style="font-size: 0.6rem;">(ไม่ระบุความหวาน)</span>'}
+                                </div>
+                            </div>
+                            <div class="mt-2 pl-1">
+                                <a href="javascript:void(0)" class="btn-remove-item" onclick="removeItem(${index})">ลบรายการ</a>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="qty-control mx-auto">
+                                <button type="button" class="btn-qty" onclick="changeQty(${index},-1)">-</button>
+                                <span class="small font-weight-bold" style="min-width: 18px;">${item.quantity}</span>
+                                <button type="button" class="btn-qty" onclick="changeQty(${index},1)">+</button>
+                            </div>
+                        </td>
+                        <td class="text-right">
+                            <div class="font-weight-bold" style="color: var(--cafe-gold); font-size: 0.9rem;">
+                                ฿${(item.price * item.quantity).toLocaleString()}
+                            </div>
+                            <div class="text-muted" style="font-size: 0.6rem;">@฿${item.price.toLocaleString()}</div>
+                        </td>
+                    </tr>
+                `;
+            });
+            calculateTotal();
+        }
+
+        document.getElementById("saleForm").addEventListener("submit", function(e) {
+            if (cart.length === 0) { 
+                alert("กรุณาเลือกสินค้าก่อนบันทึกรายการ"); 
+                e.preventDefault(); 
+                return;
+            }
+            
+            // ตรวจสอบความหวาน
+            const pendingSweetness = cart.find(item => item.sweetness === "");
+            if (pendingSweetness) {
+                alert(`กรุณาเลือกระดับความหวานของเมนู "${pendingSweetness.productName}"`);
+                e.preventDefault();
+                return;
+            }
+        });
+
+        function calculateTotal() {
+            let subtotal = 0; let totalQty = 0;
+            cart.forEach(item => { subtotal += item.price * item.quantity; totalQty += item.quantity; });
+            document.getElementById("cartCountBadge").innerText = `${totalQty} รายการ`;
+            let totalDiscount = 0; let discountList = [];
+
+            const memberSelect = document.getElementById("memberSelect");
+            if (memberSelect.value !== "") {
+                const memberDisc = Math.floor(subtotal * 0.05);
+                totalDiscount += memberDisc;
+                discountList.push(`สิทธิพิเศษสมาชิก (5%): -฿${memberDisc}`);
+            }
+
+            if (totalQty >= 3) {
+                const volumeDisc = Math.floor(subtotal * 0.10);
+                totalDiscount += volumeDisc;
+                discountList.push(`ส่วนลดปริมาณ (10%): -฿${volumeDisc}`);
+            }
+
+            const promoCode = document.getElementById("promoCode").value.toUpperCase();
+            if (promoCode === "WELCOME") { totalDiscount += 20; discountList.push(`โปรโมชัน: WELCOME -฿20`); }
+            else if (promoCode === "DOME") { const domeDisc = Math.floor(subtotal * 0.10); totalDiscount += domeDisc; discountList.push(`โปรโมชัน: DOME (10%) -฿${domeDisc}`); }
+
+            const usePoint = parseFloat(document.getElementById("usePoint").value) || 0;
+            if (usePoint > 0) { totalDiscount += usePoint; discountList.push(`แลกคะแนนสะสม: -฿${usePoint}`); }
+
+            let finalTotal = subtotal - totalDiscount;
+            if (finalTotal < 0) finalTotal = 0;
+
+            document.getElementById("subtotalDisplay").innerText = "฿" + subtotal.toLocaleString();
+            document.getElementById("discountDisplay").innerText = "-฿" + totalDiscount.toLocaleString();
+            document.getElementById("totalPrice").innerText = finalTotal.toLocaleString();
+            document.getElementById("totalInput").value = finalTotal;
+            document.getElementById("discount").value = totalDiscount;
+            document.getElementById("itemsInput").value = JSON.stringify(cart);
+
+            const detailsDiv = document.getElementById("discountDetails");
+            detailsDiv.innerHTML = discountList.length > 0 ? discountList.join("<br>") : "<span class='opacity-50'>ไม่มีส่วนลดเพิ่มเติม</span>";
+            document.getElementById("pointEarn").innerText = Math.floor(finalTotal / 20);
+        }
+
+        document.getElementById("memberSelect").addEventListener("change", function() {
+            document.getElementById("memberPoint").value = this.selectedOptions[0].dataset.point || 0;
+            calculateTotal();
+        });
+
+
+
+        let currentPOSCategory = 'เมนูทั้งหมด';
+        function setPOSCategory(cat) {
+            currentPOSCategory = cat;
+            document.querySelectorAll('.btn-pos-cat').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.dataset.category === cat) btn.classList.add('active');
+            });
+            filterPOSMenu();
+        }
+
+        function filterPOSMenu() {
+            const keyword = document.getElementById('posSearchInput').value.toLowerCase();
+            const titleEl = document.getElementById('posMenuTitle');
+            
+            if (keyword !== "") {
+                titleEl.innerHTML = `ผลการค้นหา: <span style="color: var(--cafe-gold); font-size: 0.9rem;">"${keyword}"</span>`;
+                // ซ่อนสถานะ active ของปุ่มหมวดหมู่ชั่วคราวขณะค้นหา
+                document.querySelectorAll('.btn-pos-cat').forEach(btn => btn.style.opacity = "0.5");
+            } else {
+                titleEl.innerText = "รายการสินค้า";
+                document.querySelectorAll('.btn-pos-cat').forEach(btn => btn.style.opacity = "1");
+            }
+
+            const items = document.querySelectorAll('.menu-item');
+            items.forEach(item => {
+                const name = item.querySelector('.pos-card-title').textContent.toLowerCase();
+                const itemCat = item.dataset.category;
+                const matchesSearch = name.includes(keyword);
+                
+                let matchesCategory = false;
+                if (keyword !== "") {
+                    // หากมีการค้นหา (keyword ไม่ว่าง) ให้ถือว่าผ่านเงื่อนไขหมวดหมู่ (แสดงทุกหมวดหมู่ที่ชื่อตรง)
+                    matchesCategory = true;
+                } else if (currentPOSCategory === 'เมนูทั้งหมด') {
+                    matchesCategory = true;
+                } else if (currentPOSCategory === 'เมนูยอดนิยม') {
+                    matchesCategory = (item.dataset.popular === 'true');
+                } else {
+                    matchesCategory = (itemCat.trim() === currentPOSCategory.trim());
+                }
+
+                item.style.display = (matchesSearch && matchesCategory) ? "block" : "none";
+                
+                // Set order for popular menu
+                if (currentPOSCategory === 'เมนูยอดนิยม' && item.dataset.popular === 'true') {
+                    const rank = item.querySelector('.popular-rank-tag')?.textContent;
+                    if (rank !== undefined) item.style.order = rank;
+                } else {
+                    item.style.order = "";
+                }
+            });
+        }
+
+        window.onload = () => { filterPOSMenu(); calculateTotal(); };
+    </script>
+</body>
+</html>

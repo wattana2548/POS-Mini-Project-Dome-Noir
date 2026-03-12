@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h2>สมัครสมาชิก</h2>
+
+        <% if (typeof error !=="undefined" ) { %>
+            <p class="error">
+                <%= error %>
+            </p>
+            <% } %>
+
+                <form action="/register" method="POST">
+                    <label>ชื่อ:</label>
+                    <input type="text" name="name" value="<%= typeof name !== 'undefined' ? name : '' %>" required>
+
+                    <label>อีเมล:</label>
+                    <input type="email" name="email" value="<%= typeof email !== 'undefined' ? email : '' %>" required>
+
+                    <label>เบอร์โทรศัพท์:</label>
+                    <input type="text" name="phone" value="<%= typeof phone !== 'undefined' ? phone : '' %>" required>
+
+                    <label>รหัสผ่าน:</label>
+                    <input type="password" name="password" required>
+
+                    <label>ยืนยันรหัสผ่าน:</label>
+                    <input type="password" name="confirmPassword" required>
+
+                    <button type="submit" onclick="return confirm('ยืนยันข้อมูลการสมัครสมาชิก')">
+                        สมัครสมาชิก
+                    </button>
+                    <a href="/" class="btn-cancel">กลับหน้าแรก</a>
+                </form>
+
+                <p>มีบัญชีอยู่แล้ว? <a href="/login">เข้าสู่ระบบ</a></p>
+    </div>
+</body>
+
+</html>

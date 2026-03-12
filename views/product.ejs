@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<%- include('partials/head',{ title: product.name + ' | Dome Noir' }) %>
+
+<style>
+    :root {
+        --cafe-gold: #E6C27A;
+        --cafe-dark-bg: #0d0d0d;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--cafe-dark-bg);
+        padding-top: 100px;
+        color: #eee;
+        min-height: 100vh;
+        background: linear-gradient(rgba(13,13,13,0.9), rgba(13,13,13,0.9)), 
+                    url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=2000');
+        background-size: cover;
+        background-attachment: fixed;
+    }
+
+    .detail-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .product-showcase {
+        background: rgba(25, 25, 25, 0.4);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid var(--glass-border);
+        border-radius: 30px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: row;
+        box-shadow: 0 40px 100px -20px rgba(0,0,0,0.6);
+    }
+
+    @media (max-width: 768px) {
+        .product-showcase { flex-direction: column; }
+    }
+
+    .product-visual {
+        flex: 1;
+        position: relative;
+    }
+
+    .product-visual img {
+        width: 100%;
+        height: 100%;
+        min-height: 400px;
+        object-fit: cover;
+    }
+
+    .product-info {
+        flex: 1.2;
+        padding: 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .category-label {
+        color: var(--cafe-gold);
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        font-size: 0.75rem;
+        margin-bottom: 15px;
+        font-weight: 600;
+        opacity: 0.8;
+    }
+
+    .product-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        line-height: 1.2;
+    }
+
+    .price-tag {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .price-tag::after {
+        content: "";
+        height: 1px;
+        flex: 1;
+        background: var(--glass-border);
+    }
+
+    .product-description {
+        color: #888;
+        line-height: 1.8;
+        font-size: 1rem;
+        margin-bottom: 40px;
+    }
+
+    .btn-action {
+        background: var(--cafe-gold);
+        color: #000;
+        border: none;
+        border-radius: 12px;
+        padding: 18px 30px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-decoration: none !important;
+        transition: all 0.3s ease;
+        text-align: center;
+        display: inline-block;
+    }
+
+    .btn-action:hover {
+        background: #f0d49a;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+
+    .btn-back {
+        color: #666;
+        text-decoration: none !important;
+        margin-top: 25px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.85rem;
+        transition: color 0.3s;
+    }
+    .btn-back:hover { color: #fff; }
+</style>
+
+<body>
+    <%- include('navbar', { user: user }) %>
+
+    <div class="detail-container">
+        <div class="product-showcase">
+            <div class="product-visual">
+                <img src="./images/products/<%= product.image %>" alt="<%= product.name %>">
+            </div>
+            <div class="product-info">
+                <div class="category-label"><%= product.category %></div>
+                <h1 class="product-name"><%= product.name %></h1>
+                <div class="price-tag">฿<%= product.price.toLocaleString() %></div>
+                    <%= product.description || 'สัมผัสประสบการณ์ความพิถีพิถันที่เหนือระดับจาก Dome Noir ด้วยสินค้าที่ผ่านการคัดสรรมาอย่างละเอียดถี่ถ้วน ทุกองค์ประกอบได้รับการปรับแต่งเพื่อให้คุณได้สัมผัสกับสุนทรียภาพแห่งกลิ่นและรสชาติที่แท้จริง' %>
+                </div>
+                <a href="/sales/new?product_id=<%= product._id %>" class="btn-action">
+                    เริ่มการสั่งซื้อ
+                </a>
+                <a href="/" class="btn-back">
+                    กลับสู่หน้าเมนู
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

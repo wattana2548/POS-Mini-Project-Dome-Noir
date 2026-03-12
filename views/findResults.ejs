@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<%- include('partials/head',{ title:'Search Results | Dome Noir' }) %>
+
+<style>
+    :root {
+        --cafe-gold: #E6C27A;
+        --cafe-dark-bg: #0d0d0d;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--cafe-dark-bg);
+        padding-top: 100px;
+        color: #eee;
+    }
+
+    .results-header {
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .product-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(230, 194, 122, 0.3);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .product-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .product-body {
+        padding: 25px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-title {
+        font-family: 'Playfair Display', serif;
+        color: #fff;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .product-price {
+        color: var(--cafe-gold);
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+    }
+
+    .product-desc {
+        color: #888;
+        font-size: 0.85rem;
+        line-height: 1.6;
+    }
+
+    .btn-back {
+        background: transparent;
+        color: #eee;
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        text-decoration: none !important;
+        transition: all 0.3s;
+    }
+
+    .btn-back:hover {
+        background: rgba(255,255,255,0.05);
+        border-color: #fff;
+    }
+</style>
+
+<body>
+    <%- include('navbar', { user: user }) %>
+
+    <div class="container mb-5">
+        <div class="results-header d-flex justify-content-between align-items-center">
+            <div>
+                <div class="text-muted small">สถิติการค้นหา</div>
+                <h2 class="text-light font-weight-bold m-0 mt-1">ผลการค้นหาที่พบ</h2>
+            </div>
+            <a href="/findindex" class="btn-back">
+                 ปรับแต่งการค้นหา
+            </a>
+        </div>
+
+        <div class="row">
+            <% if (products.length > 0) { %>
+                <% products.forEach(product => { %>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="product-card">
+                            <img class="product-img" src="/images/products/<%= product.image %>" alt="<%= product.name %>">
+                            <div class="product-body">
+                                <h5 class="product-title"><%= product.name %></h5>
+                                <div class="product-price">฿<%= product.price.toLocaleString() %></div>
+                                <p class="product-desc"><%= product.description || 'ไม่มีข้อมูลคำอธิบายเพิ่มเติม' %></p>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="col-12 text-center py-5">
+                    <div class="section-box" style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 24px; padding: 60px;">
+                        <i class="fas fa-search mb-4 opacity-10" style="font-size: 4rem;"></i>
+                        <h4 class="text-muted">ไม่พบข้อมูลที่ตรงกับเงื่อนไขที่คุณระบุ</h4>
+                        <a href="/findindex" class="btn btn-outline-warning mt-3">ล้างการค้นหา</a>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>

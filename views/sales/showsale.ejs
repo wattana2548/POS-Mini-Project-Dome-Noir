@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<%- include('../partials/head',{ title:'บันทึกการขาย | Dome Noir' }) %>
+
+<style>
+    :root {
+        --cafe-gold: #E6C27A;
+        --cafe-dark-bg: #0d0d0d;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--cafe-dark-bg);
+        padding-top: 100px;
+        color: #eee;
+    }
+
+    .sales-header {
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .section-box {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+
+    .filter-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 25px;
+    }
+
+    .form-label {
+        color: #888;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid var(--glass-border) !important;
+        color: #fff !important;
+        border-radius: 12px;
+        padding: 12px;
+    }
+
+    .bill-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .bill-card:hover {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(230, 194, 122, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .bill-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .bill-id {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.2rem;
+        color: var(--cafe-gold);
+        letter-spacing: 1px;
+    }
+
+    .product-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .product-row:last-child { border-bottom: none; }
+
+    .product-thumb {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .badge-pay {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .bg-cash { background: rgba(74, 222, 128, 0.1); color: #4ade80; }
+    .bg-transfer { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
+    .bg-qr { background: rgba(230, 194, 122, 0.1); color: var(--cafe-gold); }
+
+    .summary-widget {
+        text-align: center;
+        padding: 20px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--glass-border);
+    }
+
+    .summary-widget h6 {
+        font-size: 0.75rem;
+        color: #777;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 10px;
+    }
+
+    .summary-widget h3 {
+        color: #fff;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .btn-premium {
+        background: var(--cafe-gold);
+        color: #000;
+        border-radius: 12px;
+        padding: 12px 25px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        text-decoration: none !important;
+    }
+
+    .btn-premium:hover {
+        background: #f0d49a;
+        transform: translateY(-2px);
+    }
+</style>
+
+<body>
+    <%- include('../navbar', { user: user }) %>
+
+    <div class="container mb-5">
+        <div class="sales-header d-flex justify-content-between align-items-end">
+            <div>
+                <div class="welcome-text">ประวัติการทำรายการ</div>
+                <h2 class="text-light font-weight-bold m-0 mt-1">คลังข้อมูลการขาย</h2>
+            </div>
+            <a href="/sales/new" class="btn-premium">
+                เริ่มการขายใหม่
+            </a>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="section-box">
+            <form action="/sales/all" method="GET" class="row align-items-end">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <label class="form-label">ตั้งแต่วันที่</label>
+                    <input type="date" name="startDate" class="form-control" value="<%= startDate %>">
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <label class="form-label">จนถึงวันที่</label>
+                    <input type="date" name="endDate" class="form-control" value="<%= endDate %>">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-premium w-100">
+                        ใช้งานตัวกรอง
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div class="row mb-5">
+            <div class="col-md-6 mb-4 mb-md-0">
+                <div class="summary-widget">
+                    <h6>จำนวนบิลทั้งหมด</h6>
+                    <h3><%= summary.count %> <span class="small text-muted font-weight-normal" style="font-size: 0.9rem;">รายการ</span></h3>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="summary-widget" style="border-right: 4px solid #4ade80;">
+                    <h6>รายได้สะสม</h6>
+                    <h3 class="text-success">฿<%= summary.total.toLocaleString() %></h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales Bills -->
+        <div class="sales-list">
+            <% if(sales.length === 0) { %>
+                <div class="section-box text-center py-5">
+                    <p class="text-muted">ไม่พบรายการธุรกรรมในช่วงเวลาที่เลือก</p>
+                </div>
+            <% } %>
+
+            <% sales.forEach((sale, index) => { %>
+                <div class="bill-card">
+                    <div class="bill-header">
+                        <div>
+                            <div class="bill-id">บันทึกการขายรายการที่ <%= sales.length - index %></div>
+                            <div class="text-muted small mt-1">
+                                <%= sale.member ? sale.member.name : "ลูกค้าทั่วไป" %>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="mb-2">
+                                <% if(sale.paymentMethod === "เงินสด"){ %>
+                                    <span class="badge-pay bg-cash">เงินสด</span>
+                                <% } else if(sale.paymentMethod === "โอน"){ %>
+                                    <span class="badge-pay bg-transfer">โอนเงิน</span>
+                                <% } else { %>
+                                    <span class="badge-pay bg-qr">QR Code/อื่น ๆ</span>
+                                <% } %>
+                            </div>
+                            <div class="text-muted small">
+                                <%= new Date(sale.date).toLocaleString('th-TH', {
+                                    dateStyle:'medium',
+                                    timeStyle:'short'
+                                }) %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bill-items">
+                        <% sale.items.forEach(item => { %>
+                            <div class="product-row">
+                                <div class="d-flex align-items-center">
+                                    <img class="product-thumb mr-3" src="/images/products/<%= item.productImage || 'no-image.png' %>">
+                                    <div>
+                                        <div class="text-light font-weight-500"><%= item.productName %></div>
+                                        <div class="text-muted small">ราคาต่อหน่วย: ฿<%= item.price.toLocaleString() %> × <%= item.quantity %></div>
+                                    </div>
+                                </div>
+                                <div class="text-light font-weight-600">
+                                    ฿<%= (item.price * item.quantity).toLocaleString() %>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+
+                    <div class="text-right mt-4 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <% if(sale.discount > 0){ %>
+                            <div class="text-muted small mb-1">
+                                ส่วนลดโปรโมชัน: <span class="text-warning">-฿<%= sale.discount.toLocaleString() %></span>
+                            </div>
+                        <% } %>
+                        <div class="h4 m-0 text-success font-weight-bold">
+                            <span class="text-muted small font-weight-normal mr-2">ยอดรวมสุทธิ</span>
+                            ฿<%= sale.totalPrice.toLocaleString() %>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<style>
+    .navbar {
+        transition: all 0.4s ease;
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        background: rgba(13, 13, 13, 0.8) !important;
+    }
+
+    .navbar-brand {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        letter-spacing: 2px;
+        color: var(--cafe-gold) !important;
+        text-transform: uppercase;
+    }
+
+    .nav-link {
+        font-size: 0.85rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #aaa !important;
+        font-weight: 500;
+        margin: 0 10px;
+        position: relative;
+        transition: color 0.3s ease;
+    }
+
+    .nav-link:hover, .nav-link.active {
+        color: var(--cafe-gold) !important;
+    }
+
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: var(--cafe-gold);
+        transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::after, .nav-link.active::after {
+        width: 100%;
+    }
+
+    .dropdown-menu {
+        background: rgba(20, 20, 20, 0.95);
+        border: 1px solid rgba(230, 194, 122, 0.1);
+        backdrop-filter: blur(15px);
+        border-radius: 12px;
+        margin-top: 15px;
+        padding: 10px;
+    }
+
+    .dropdown-item {
+        color: #aaa;
+        font-size: 0.85rem;
+        padding: 10px 20px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .dropdown-item:hover {
+        background: rgba(230, 194, 122, 0.1);
+        color: var(--cafe-gold);
+    }
+
+    .user-profile {
+        padding: 5px 15px;
+        border-radius: 30px;
+        background: rgba(230, 194, 122, 0.1);
+        border: 1px solid rgba(230, 194, 122, 0.2);
+    }
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+        <!-- LOGO -->
+        <a href="/" class="navbar-brand">
+            <span>Dome Noir</span>
+        </a>
+
+        <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#navbarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            <!-- LEFT MENU -->
+            <ul class="navbar-nav mr-auto">
+
+
+                <% if (user) { %>
+                    <!-- STORE -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="storeDropdown" data-toggle="dropdown">
+                            ร้านค้า
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="/sales/new">ระบบขายหน้าร้าน</a>
+                            <a class="dropdown-item" href="/sales/all">ประวัติการขาย</a>
+                        </div>
+                    </li>
+
+                    <% if (user.role === "admin") { %>
+                        <!-- PRODUCTS -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="prodDropdown" data-toggle="dropdown">
+                                สินค้า
+                            </a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="/addForm">เพิ่มสินค้า</a>
+                                <a class="dropdown-item" href="/manage">ศูนย์ควบคุม</a>
+                            </div>
+                        </li>
+
+                        <!-- EMPLOYEES -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="empDropdown" data-toggle="dropdown">
+                                บุคลากร
+                            </a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="/members/manageMembers">บัญชีรายชื่อพนักงาน</a>
+                                <a class="dropdown-item" href="/members/addEmployee">รับสมัครพนักงาน</a>
+                            </div>
+                        </li>
+                    <% } %>
+
+                    <!-- MEMBERS -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="memberDropdown" data-toggle="dropdown">
+                            สมาชิก
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="/customers/manageCustomers">ฐานข้อมูลสมาชิก</a>
+                            <a class="dropdown-item" href="/customers/addCustomer">สมัครสมาชิก</a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">แดชบอร์ด</a>
+                    </li>
+                <% } %>
+            </ul>
+
+            <!-- RIGHT SIDE -->
+            <ul class="navbar-nav ml-auto align-items-center">
+                <% if (user) { %>
+                    <li class="nav-item mr-3">
+                        <div class="user-profile">
+                            <span class="text-warning small font-weight-bold">
+                                <%= user.name %> <span class="text-muted ml-1" style="font-size: 0.7rem;">(<%= user.role %>)</span>
+                            </span>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light px-0" href="/logout">ออกจากระบบ</a>
+                    </li>
+                <% } else { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">เข้าสู่ระบบ</a>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<script>
+    // Handle Navbar scroll effect
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.style.padding = '10px 0';
+            navbar.style.background = 'rgba(10, 10, 10, 0.95) !important';
+        } else {
+            navbar.style.padding = '15px 0';
+            navbar.style.background = 'rgba(13, 13, 13, 0.8) !important';
+        }
+    });
+
+    // Set active link
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+        }
+    });
+</script>

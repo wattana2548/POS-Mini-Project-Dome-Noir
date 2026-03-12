@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<%- include('partials/head', { title: 'แผงควบคุมการดำเนินงาน | Dome Noir' }) %>
+
+<style>
+    :root {
+        --cafe-gold: #E6C27A;
+        --cafe-dark-bg: #0d0d0d;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--cafe-dark-bg);
+        padding-top: 100px;
+    }
+
+    .dashboard-header {
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .welcome-text {
+        font-size: 0.9rem;
+        color: #888;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .dash-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 30px;
+        height: 100%;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dash-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(230, 194, 122, 0.3);
+    }
+
+    .dash-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: transparent;
+        transition: background 0.3s ease;
+    }
+
+    .dash-card.gold::before { background: var(--cafe-gold); }
+    .dash-card.green::before { background: #4ade80; }
+    .dash-card.blue::before { background: #38bdf8; }
+    .dash-card.red::before { background: #f87171; }
+
+    .dash-card h6 {
+        color: #777;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 15px;
+    }
+
+    .dash-card .value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+    }
+
+    .section-box {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 35px;
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        color: var(--cafe-gold);
+        font-size: 1.1rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .section-title i { opacity: 0.5; font-size: 0.9rem; }
+
+    /* Custom Table Style */
+    .premium-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+    .premium-table th {
+        color: #666;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 10px 20px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .premium-table td {
+        background: rgba(255, 255, 255, 0.02);
+        padding: 20px;
+        color: #ccc;
+        font-size: 0.9rem;
+    }
+
+    .premium-table tr td:first-child { border-radius: 12px 0 0 12px; }
+    .premium-table tr td:last-child { border-radius: 0 12px 12px 0; }
+
+    .premium-table tr:hover td {
+        background: rgba(255, 255, 255, 0.04);
+        color: #fff;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .bg-cash { background: rgba(74, 222, 128, 0.1); color: #4ade80; }
+    .bg-transfer { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
+    .bg-qr { background: rgba(230, 194, 122, 0.1); color: var(--cafe-gold); }
+
+    .top-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid var(--glass-border);
+    }
+    .top-item:last-child { border-bottom: none; }
+
+    .rank-num {
+        width: 30px;
+        height: 30px;
+        background: rgba(230, 194, 122, 0.1);
+        color: var(--cafe-gold);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-right: 15px;
+    }
+</style>
+
+<body>
+
+<%- include('navbar', { user: user }) %>
+
+<!-- Load Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="container">
+
+    <!-- Header -->
+    <div class="dashboard-header d-flex justify-content-between align-items-end">
+        <div>
+            <div class="welcome-text">ข้อมูลเชิงลึกทางธุรกิจ</div>
+            <h2 class="text-light font-weight-bold m-0 mt-1">บทวิเคราะห์การดำเนินงาน</h2>
+        </div>
+        <div class="text-right">
+            <span class="badge bg-dark border border-secondary text-muted px-3 py-2 rounded-pill">
+                <%= user.name %> (<%= user.role %>)
+            </span>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-4 mb-md-0">
+            <div class="dash-card green">
+                <h6>รายได้ประจำวัน</h6>
+                <div class="value text-success">฿<%= summary.total.toLocaleString() %></div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4 mb-md-0">
+            <div class="dash-card gold">
+                <h6>รายการสั่งซื้อทั้งหมด</h6>
+                <div class="value"><%= summary.count %> <span class="small text-muted font-weight-normal" style="font-size: 0.9rem">บิล</span></div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4 mb-md-0">
+            <div class="dash-card blue">
+                <h6>จำนวนลูกค้า</h6>
+                <div class="value text-info"><%= summary.distinctCustomers %> <span class="small text-muted font-weight-normal" style="font-size: 0.9rem">คน</span></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dash-card red">
+                <h6>สินค้าขายดีที่สุด</h6>
+                <div class="value text-danger" style="font-size: 1.4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <%= (topProducts && topProducts.length > 0) ? topProducts[0]._id : "ยังไม่มีข้อมูลรายการสั่งซื้อ" %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sales Chart -->
+        <div class="col-lg-8">
+            <div class="section-box">
+                <div class="section-title">
+                    แนวโน้มรายได้ (7 วันล่าสุด)
+                </div>
+                <div style="height: 350px;">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Products -->
+        <div class="col-lg-4">
+            <div class="section-box h-100">
+                <div class="section-title">
+                    สินค้าที่ทำผลงานได้ดี
+                </div>
+                
+                <% if(topProducts && topProducts.length > 0) { %>
+                    <div class="mt-2">
+                        <% topProducts.forEach((p, index) => { %>
+                            <div class="top-item">
+                                <div class="d-flex align-items-center">
+                                    <div class="rank-num"><%= index + 1 %></div>
+                                    <div class="text-light font-weight-500"><%= p._id %></div>
+                                </div>
+                                <div class="badge bg-dark border border-secondary text-muted rounded-pill px-3">ขายได้ <%= p.qty %> รายการ</div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-5 text-muted">ยังไม่มีข้อมูลรายการสินค้า</div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent History -->
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="section-box">
+                <div class="section-title">
+                    บันทึกกิจกรรมล่าสุด
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th class="text-left">วัน-เวลา</th>
+                                <th class="text-left">ลูกค้า</th>
+                                <th>ช่องทางชำระเงิน</th>
+                                <th class="text-right">ยอดรวมธุรกรรม</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if(recentSales && recentSales.length > 0) { %>
+                                <% recentSales.forEach(sale => { %>
+                                    <tr>
+                                        <td class="text-left">
+                                            <%= new Date(sale.date).toLocaleString('th-TH', { dateStyle:'medium', timeStyle:'short' }) %>
+                                        </td>
+                                        <td class="text-left">
+                                            <%= sale.member ? sale.member.name : 'ลูกค้าทั่วไป' %>
+                                        </td>
+                                        <td>
+                                            <% if(sale.paymentMethod === 'เงินสด') { %>
+                                                <span class="status-badge bg-cash">เงินสด</span>
+                                            <% } else if(sale.paymentMethod === 'โอน') { %>
+                                                <span class="status-badge bg-transfer">โอนเงิน</span>
+                                            <% } else { %>
+                                                <span class="status-badge bg-qr">QR Code/อื่น ๆ</span>
+                                            <% } %>
+                                        </td>
+                                        <td class="text-right font-weight-bold text-success">
+                                            ฿<%= sale.totalPrice.toLocaleString() %>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">ยังไม่พบรายการธุรกรรมบันทึกไว้</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const rawLabels = <%- chartLabels %>;
+    const rawData = <%- chartData %>;
+
+    const formattedLabels = rawLabels.map(d => {
+        let parts = d.split('-');
+        const date = new Date(parts[0], parts[1]-1, parts[2]);
+        return date.toLocaleDateString('th-TH', { day: '2-digit', month: 'short' });
+    });
+
+    // Create Gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(230, 194, 122, 0.2)');
+    gradient.addColorStop(1, 'rgba(230, 194, 122, 0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: formattedLabels,
+            datasets: [{
+                label: 'รายได้',
+                data: rawData,
+                backgroundColor: gradient,
+                borderColor: '#E6C27A',
+                borderWidth: 3,
+                pointBackgroundColor: '#E6C27A',
+                pointBorderColor: 'rgba(255,255,255,0.1)',
+                pointBorderWidth: 4,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1a1a1a',
+                    titleColor: '#E6C27A',
+                    bodyColor: '#fff',
+                    padding: 15,
+                    cornerRadius: 12,
+                    displayColors: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
+                    ticks: { color: '#666', font: { size: 11 } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#666', font: { size: 11 } }
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

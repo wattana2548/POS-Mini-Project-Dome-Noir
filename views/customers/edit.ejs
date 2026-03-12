@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<%- include('../partials/head',{ title:'Profile Refinement | Dome Noir' }) %>
+
+<style>
+    :root {
+        --cafe-gold: #E6C27A;
+        --cafe-dark-bg: #0d0d0d;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--cafe-dark-bg);
+        padding-top: 100px;
+        color: #eee;
+        min-height: 100vh;
+        background: linear-gradient(rgba(13,13,13,0.95), rgba(13,13,13,0.95)), 
+                    url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=2000');
+        background-size: cover;
+        background-attachment: fixed;
+    }
+
+    .form-container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .section-box {
+        background: rgba(25, 25, 25, 0.4);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .form-header h2 {
+        color: var(--cafe-gold);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .form-label {
+        color: #888;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid var(--glass-border) !important;
+        color: #fff !important;
+        border-radius: 12px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--cafe-gold) !important;
+        box-shadow: 0 0 0 4px rgba(230, 194, 122, 0.1) !important;
+    }
+
+    .btn-save {
+        background: var(--cafe-gold);
+        color: #000;
+        border: none;
+        border-radius: 12px;
+        padding: 15px 40px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        width: 100%;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+    }
+
+    .btn-save:hover {
+        background: #f0d49a;
+        transform: translateY(-2px);
+    }
+
+    .btn-back {
+        background: transparent;
+        color: #888;
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 12px;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+        text-decoration: none !important;
+        display: block;
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .btn-back:hover {
+        background: rgba(255,255,255,0.05);
+        color: #fff;
+    }
+</style>
+
+<body>
+    <%- include('../navbar', { user: user }) %>
+
+    <div class="form-container">
+        <div class="section-box">
+            <div class="form-header">
+                <h2>ปรับปรุงข้อมูลสมาชิก</h2>
+                <div class="text-muted small">อัปเดตข้อมูลลูกค้าคนพิเศษของเรา</div>
+            </div>
+
+            <form action="/customers/updateCustomer" method="POST">
+                
+                <input type="hidden" name="id" value="<%= customer._id %>">
+
+                <div class="mb-4">
+                    <label class="form-label">ชื่อสมาชิก</label>
+                    <input type="text" name="name" class="form-control" value="<%= customer.name %>" required>
+                </div>
+
+                <div class="mb-5">
+                    <label class="form-label">ข้อมูลติดต่อ</label>
+                    <input type="text" name="phone" class="form-control" value="<%= customer.phone %>">
+                </div>
+
+                <button type="submit" class="btn-save">
+                    บันทึกการเปลี่ยนแปลง
+                </button>
+
+                <a href="/customers/manageCustomers" class="btn-back">
+                    ยกเลิกและกลับหน้าเดิม
+                </a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,214 @@
+/* =========================
+   ☕ CAFE DARK PRO THEME (MIDNIGHT GOLD)
+========================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;600;700&display=swap');
+
+body {
+    background-color: #0d0d0d;
+    background-image: radial-gradient(circle at top right, #1a1a1a 0%, #0d0d0d 60%);
+    color: #e6e6e6;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    min-height: 100vh;
+}
+
+/* ================= NAVBAR ================= */
+
+.navbar {
+    background: rgba(15, 15, 15, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-brand {
+    color: #D4AF37 !important; /* Classic Gold */
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.nav-link {
+    color: #b3b3b3 !important;
+    font-weight: 400;
+    transition: all .3s ease;
+}
+
+.nav-link:hover {
+    color: #E6C27A !important; /* Light Champagne Gold */
+    transform: translateY(-2px);
+    text-shadow: 0 0 10px rgba(230, 194, 122, 0.4);
+}
+
+/* ================= DROPDOWN ================= */
+
+.dropdown-menu {
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.dropdown-item {
+    color: #ccc;
+    font-weight: 400;
+    transition: .3s ease;
+}
+
+.dropdown-item:hover {
+    background: linear-gradient(90deg, rgba(212, 175, 55, 0.1) 0%, transparent 100%);
+    color: #D4AF37;
+}
+
+/* ================= CARD (LUXURY GLASS) ================= */
+
+.card {
+    background: rgba(25, 25, 25, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    transition: all .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 12px 40px rgba(212, 175, 55, 0.15);
+}
+
+/* ================= BUTTON ================= */
+
+.btn-primary, .btn-success.mb-4 {
+    background: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+    background-size: 200% 200%;
+    color: #111 !important;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: .4s ease;
+    box-shadow: 0 4px 15px rgba(191, 149, 63, 0.3);
+}
+
+.btn-primary:hover, .btn-success.mb-4:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(230, 194, 122, 0.4);
+    background-position: right center;
+}
+
+.btn-outline-warning {
+    color: #E6C27A;
+    border-color: #D4AF37;
+    transition: .3s ease;
+}
+
+.btn-outline-warning:hover {
+    background: linear-gradient(135deg, #BF953F, #B38728);
+    color: #000;
+    border-color: transparent;
+}
+
+/* ================= TABLE NOIR ================= */
+
+.table {
+    background: rgba(20, 20, 20, 0.6) !important;
+    backdrop-filter: blur(10px);
+    color: #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead {
+    background: rgba(15, 15, 15, 0.8);
+    color: #D4AF37;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.table td, .table th {
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    padding: 15px;
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    transition: background .3s;
+}
+
+.table tbody tr:hover {
+    background: rgba(212, 175, 55, 0.05) !important;
+}
+
+/* ================= INPUT ================= */
+
+.form-control, .form-select {
+    background: rgba(30, 30, 30, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+    border-radius: 10px;
+    padding: 12px 15px;
+    transition: .3s;
+}
+
+.form-control::placeholder {
+    color: #666 !important;
+}
+
+.form-control:focus, .form-select:focus {
+    background: rgba(40, 40, 40, 0.8) !important;
+    color: white !important;
+    border-color: #D4AF37 !important;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25) !important;
+    outline: none;
+}
+
+/* ================= TITLE ================= */
+
+h1, h2, h3, h4, h5, h6 {
+    color: #E6C27A;
+    font-weight: 700;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 0.5px;
+}
+
+/* ================= BADGES ================= */
+
+.badge.bg-success { background: rgba(40, 167, 69, 0.15) !important; color: #4ade80 !important; border: 1px solid rgba(74, 222, 128, 0.3); }
+.badge.bg-primary { background: rgba(23, 162, 184, 0.15) !important; color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); }
+.badge.bg-warning { background: rgba(212, 175, 55, 0.15) !important; color: #FCDA6B !important; border: 1px solid rgba(252, 218, 107, 0.3); }
+.badge.bg-secondary { background: rgba(255,255,255,0.1) !important; color: #ccc !important; }
+
+/* ================= SCROLLBAR ================= */
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #0d0d0d;
+}
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #D4AF37;
+}
+
+/* ================= UTILITIES ================= */
+
+.text-success { color: #4ade80 !important; }
+.text-warning { color: #D4AF37 !important; }
+.text-info { color: #38bdf8 !important; }
+.text-danger { color: #f87171 !important; }
+
+/* FIX WHITE BACKGROUND */
+.container {
+    background-color: transparent !important;
+}

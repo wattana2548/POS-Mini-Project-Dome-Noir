@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<%- include('partials/head',{ title:'Deep Search | Dome Noir' }) %>
+
+<style>
+    :root {
+        --cafe-gold: #E6C27A;
+        --cafe-dark-bg: #0d0d0d;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--cafe-dark-bg);
+        padding-top: 100px;
+        color: #eee;
+        min-height: 100vh;
+        background: linear-gradient(rgba(13,13,13,0.95), rgba(13,13,13,0.95)), 
+                    url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=2000');
+        background-size: cover;
+        background-attachment: fixed;
+    }
+
+    .form-container {
+        max-width: 650px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .section-box {
+        background: rgba(25, 25, 25, 0.4);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .form-header h2 {
+        color: var(--cafe-gold);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .form-label {
+        color: #888;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid var(--glass-border) !important;
+        color: #fff !important;
+        border-radius: 12px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--cafe-gold) !important;
+        box-shadow: 0 0 0 4px rgba(230, 194, 122, 0.1) !important;
+    }
+
+    .btn-search {
+        background: var(--cafe-gold);
+        color: #000;
+        border: none;
+        border-radius: 12px;
+        padding: 15px 40px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        width: 100%;
+        transition: all 0.3s ease;
+        margin-top: 30px;
+    }
+
+    .btn-search:hover {
+        background: #f0d49a;
+        transform: translateY(-2px);
+    }
+
+    .btn-back {
+        background: transparent;
+        color: #888;
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 12px;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+        text-decoration: none !important;
+        display: block;
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .btn-back:hover {
+        background: rgba(255,255,255,0.05);
+        color: #fff;
+    }
+
+    .form-check-label {
+        font-size: 0.85rem;
+        color: #ccc;
+        cursor: pointer;
+    }
+</style>
+
+<body>
+    <%- include('navbar', { user: user }) %>
+
+    <div class="form-container">
+        <div class="section-box">
+            <div class="form-header">
+                <h2>ค้นหาสินค้า</h2>
+                <div class="text-muted small">การค้นหาขั้นสูงเพื่อการดึงข้อมูลจากฐานข้อมูล</div>
+            </div>
+
+            <form action="/find" method="GET">
+                <div class="mb-4">
+                    <label class="form-label">ชื่อสินค้า (ค้นหาแบบตรงตัว)</label>
+                    <input type="text" name="name" class="form-control" placeholder="ระบุชื่อสินค้า">
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <label class="form-label">ราคาเริ่มต้น (≥)</label>
+                        <input type="number" name="minPrice" class="form-control" placeholder="Min">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">ราคาสูงสุด (≤)</label>
+                        <input type="number" name="maxPrice" class="form-control" placeholder="Max">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">ชื่อสินค้าที่ไม่ต้องการ (≠)</label>
+                    <input type="text" name="exclude" class="form-control" placeholder="ระบุชื่อสินค้าที่ไม่ต้องการแสดง">
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="highPrice" name="highPriceOnly">
+                    <label class="form-check-label" for="highPrice">สินค้าระดับพรีเมียม (> 5,000 บาท)</label>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="lowPrice" name="lowPriceOnly">
+                    <label class="form-check-label" for="lowPrice">สินค้าทั่วไป (< 2,000 บาท)</label>
+                </div>
+
+                <button type="submit" class="btn-search">
+                    ดำเนินการค้นหา 
+                </button>
+
+                <a href="/manage" class="btn-back">
+                    กลับหน้าจัดการสินค้า
+                </a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

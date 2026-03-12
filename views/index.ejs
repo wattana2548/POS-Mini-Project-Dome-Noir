@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title><%= title %></title>
+    <script src="js/jquery-3.4.1.slim.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/cafe-dark.css">
+
+    <style>
+        :root {
+            --cafe-gold: #E6C27A;
+            --cafe-dark-bg: #0d0d0d;
+        }
+
+        body {
+            background-color: var(--cafe-dark-bg);
+            overflow-x: hidden;
+        }
+
+        .hero-section {
+            padding: 100px 0 60px;
+            text-align: center;
+            background: linear-gradient(rgba(13,13,13,0.7), rgba(13,13,13,0.7)), 
+                        url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=2000');
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 40px;
+        }
+
+        .cafe-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 2px 2px 15px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+        }
+
+        /* Category Nav */
+        .category-nav-wrapper {
+            margin-bottom: 50px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .cat-nav {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .cat-nav::-webkit-scrollbar { display: none; }
+
+        .cat-link {
+            color: #888;
+            text-decoration: none !important;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .cat-link:hover { color: #fff; }
+
+        .cat-link.active {
+            color: var(--cafe-gold);
+        }
+
+        .cat-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--cafe-gold);
+        }
+
+        /* Slider Wrapper */
+        .slider-outer-wrapper {
+            position: relative;
+            padding: 0 60px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .slider-container {
+            display: flex;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            gap: 30px;
+            padding: 20px 0;
+        }
+
+        .product-card-wrapper {
+            flex: 0 0 calc(20% - 24px); /* 5 items per view */
+            transition: transform 0.3s ease;
+        }
+
+        @media (max-width: 1400px) { .product-card-wrapper { flex: 0 0 calc(25% - 22.5px); } }
+        @media (max-width: 1100px) { .product-card-wrapper { flex: 0 0 calc(33.333% - 20px); } }
+        @media (max-width: 850px) { .product-card-wrapper { flex: 0 0 calc(50% - 15px); } }
+        @media (max-width: 550px) { .product-card-wrapper { flex: 0 0 100%; } }
+
+        .clean-card {
+            background: transparent;
+            border: none;
+            text-align: center;
+        }
+
+        .card-img-container {
+            width: 100%;
+            aspect-ratio: 1/1.1;
+            overflow: hidden;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            background: #1a1a1a;
+        }
+
+        .clean-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card-wrapper:hover img {
+            transform: scale(1.1);
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .product-price {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        /* Arrows */
+        .nav-arrow {
+            position: absolute;
+            top: 40%;
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .nav-arrow:hover {
+            background: var(--cafe-gold);
+            color: #000;
+            border-color: var(--cafe-gold);
+        }
+
+        .nav-arrow.left { left: 0; }
+        .nav-arrow.right { right: 0; }
+
+        .nav-arrow.disabled {
+            opacity: 0.2;
+            cursor: default;
+        }
+
+        /* Progress Counter */
+        .slider-progress {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #666;
+            letter-spacing: 2px;
+        }
+
+        .current-page { color: #fff; font-weight: bold; }
+
+        /* Order Button Popup */
+        .order-btn-overlay {
+            position: absolute;
+            bottom: 0px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .product-card-wrapper:hover .order-btn-overlay {
+            bottom: 20px;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <%- include('navbar', { user:user }) %>
+
+    <section class="hero-section">
+        <div class="container">
+            <h1 class="cafe-title">Dome Noir</h1>
+            <div class="d-flex justify-content-center">
+                <div style="width: 100%; max-width: 500px;">
+                    <input type="text" id="searchPublicMenu" class="form-control rounded-pill bg-dark text-light border-secondary" 
+                           placeholder="ค้นหาคอลเลกชันสุดพิเศษ..." onkeyup="filterMenuSearch()">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <!-- Category Navigation -->
+        <nav class="category-nav-wrapper">
+            <ul class="cat-nav">
+                <li class="cat-link active" data-category="เมนูยอดนิยม" onclick="switchCategory('เมนูยอดนิยม')">เมนูยอดนิยม</li>
+                <li class="cat-link" data-category="กาแฟ" onclick="switchCategory('กาแฟ')">เมนูกาแฟ</li>
+                <li class="cat-link" data-category="ชา" onclick="switchCategory('ชา')">เมนูชา</li>
+                <li class="cat-link" data-category="ช็อกโกแลตและนม" onclick="switchCategory('ช็อกโกแลตและนม')">เมนูช็อกโกแลตและนม</li>
+                <li class="cat-link" data-category="โซดา" onclick="switchCategory('โซดา')">เมนูโซดา</li>
+                <li class="cat-link" data-category="เมนูปั่น" onclick="switchCategory('เมนูปั่น')">เมนูปั่น</li>
+                <li class="cat-link" data-category="เบเกอรี่" onclick="switchCategory('เบเกอรี่')">เบเกอรี่</li>
+            </ul>
+        </nav>
+        
+        <!-- Search Results Header -->
+        <div id="searchHeaderArea" class="mb-4 text-center" style="display: none;">
+            <h4 style="color: #fff; font-weight: 300;">ผลการค้นหาสำหรับ: <span id="searchQueryDisplay" style="color: var(--cafe-gold); font-weight: 600;"></span></h4>
+            <a href="javascript:void(0)" onclick="clearSearch()" style="color: #666; font-size: 0.8rem; text-decoration: none;">(ล้างการค้นหา)</a>
+        </div>
+
+        <!-- Slider Section -->
+        <div class="slider-outer-wrapper">
+            <button class="nav-arrow left" onclick="sideScroll('left')">&lt;</button>
+            <button class="nav-arrow right" onclick="sideScroll('right')">&gt;</button>
+
+            <div class="slider-container" id="sliderContainer">
+                <!-- Products dynamically loaded here -->
+            </div>
+
+            <div class="slider-progress">
+                <span class="current-page" id="currentPage">01</span> / <span id="totalPages">01</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data passed from EJS to JS -->
+    <script>
+        const allProducts = <%- JSON.stringify(products) %>.map(p => ({
+            ...p,
+            _id: p._id.toString()
+        }));
+        const popularIds = <%- JSON.stringify(popularIds) %>;
+        let currentCategory = 'เมนูยอดนิยม';
+        const userLoggedIn = <%= !!user %>;
+
+        function renderProducts(category, search = '') {
+            const container = document.getElementById('sliderContainer');
+            container.innerHTML = '';
+            
+            const searchHeader = document.getElementById('searchHeaderArea');
+            const searchQueryDisplay = document.getElementById('searchQueryDisplay');
+
+            if (search) {
+                searchHeader.style.display = 'block';
+                searchQueryDisplay.innerText = `'${search}'`;
+                // ยกเลิกสถานะ active ของหมวดหมู่เมื่อมีการค้นหา เพื่อไม่ให้สับสน
+                document.querySelectorAll('.cat-link').forEach(link => link.classList.remove('active'));
+            } else {
+                searchHeader.style.display = 'none';
+                // คืนค่า active ให้กับหมวดหมู่ที่ถูกเลือกอยู่ และลบของเดิมออกก่อน
+                document.querySelectorAll('.cat-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('data-category') === category) link.classList.add('active');
+                });
+            }
+
+            let filtered = [];
+            if (search) {
+                // หากมีการค้นหา ให้ค้นหาจากสินค้าทั้งหมดทุกหมวดหมู่
+                filtered = allProducts.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+            } else if (category === 'เมนูยอดนิยม') {
+                // Filter and keep the order of popularIds
+                popularIds.forEach(pid => {
+                    const product = allProducts.find(p => p._id.toString() === pid.toString());
+                    if (product) filtered.push(product);
+                });
+            } else {
+                filtered = allProducts.filter(p => p.category.trim() === category.trim());
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="w-100 text-center py-5 text-muted">ไม่พบข้อมูลเมนูในหมวดหมู่นี้</div>`;
+                updateProgress(0, 0);
+                return;
+            }
+
+            filtered.forEach(p => {
+                const card = `
+                    <div class="product-card-wrapper position-relative">
+                        <div class="clean-card h-100">
+                            <div class="card-img-container position-relative">
+                                <img src="/images/products/${p.image}" alt="${p.name}">
+                                ${userLoggedIn ? `
+                                <div class="order-btn-overlay">
+                                    <a href="/sales/new?product_id=${p._id}" class="btn btn-warning rounded-pill px-4">สั่งเลย</a>
+                                </div>` : ''}
+                            </div>
+                            <div class="product-name">${p.name}</div>
+                            <div class="product-price">${p.price} บาท</div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+
+            // Initial scroll to start
+            container.scrollLeft = 0;
+            updateProgress(1, filtered.length);
+            updateArrows();
+        }
+
+        function switchCategory(cat) {
+            currentCategory = cat;
+            document.getElementById('searchPublicMenu').value = ''; // ล้างช่องค้นหาเมื่อเปลี่ยนหมวดหมู่
+            renderProducts(cat);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchPublicMenu').value = '';
+            switchCategory(currentCategory);
+        }
+
+        function filterMenuSearch() {
+            const search = document.getElementById('searchPublicMenu').value;
+            renderProducts(currentCategory, search);
+        }
+
+        function sideScroll(direction) {
+            const container = document.getElementById('sliderContainer');
+            const scrollAmount = container.offsetWidth * 0.8;
+            if (direction === 'left') {
+                container.scrollLeft -= scrollAmount;
+            } else {
+                container.scrollLeft += scrollAmount;
+            }
+            setTimeout(updateArrows, 500);
+        }
+
+        function updateArrows() {
+            const container = document.getElementById('sliderContainer');
+            const leftArrow = document.querySelector('.nav-arrow.left');
+            const rightArrow = document.querySelector('.nav-arrow.right');
+
+            if (container.scrollLeft <= 0) {
+                leftArrow.classList.add('disabled');
+            } else {
+                leftArrow.classList.remove('disabled');
+            }
+
+            if (container.scrollLeft + container.offsetWidth >= container.scrollWidth - 10) {
+                rightArrow.classList.add('disabled');
+            } else {
+                rightArrow.classList.remove('disabled');
+            }
+
+            // Update page counter based on scroll
+            const itemWidth = container.querySelector('.product-card-wrapper')?.offsetWidth || 1;
+            const currentIdx = Math.round(container.scrollLeft / itemWidth);
+            const total = container.querySelectorAll('.product-card-wrapper').length;
+            if (total > 0) {
+                document.getElementById('currentPage').innerText = String(Math.min(currentIdx + 1, total)).padStart(2, '0');
+            }
+        }
+
+        function updateProgress(current, total) {
+            document.getElementById('currentPage').innerText = String(current).padStart(2, '0');
+            document.getElementById('totalPages').innerText = String(total).padStart(2, '0');
+        }
+
+        // Handle manual scroll updates
+        document.getElementById('sliderContainer').addEventListener('scroll', () => {
+             updateArrows();
+        });
+
+        // Initial Load
+        window.onload = () => {
+            renderProducts('เมนูยอดนิยม');
+        };
+    </script>
+</body>
+
+</html>
