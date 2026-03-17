@@ -345,11 +345,16 @@
 
                         <div class="mb-4">
                             <label class="form-label">ช่องทางชำระเงิน</label>
-                            <select name="paymentMethod" class="form-select">
+                            <select name="paymentMethod" id="paymentMethod" class="form-select" onchange="toggleQRCode()">
                                 <option value="เงินสด">เงินสด</option>
                                 <option value="QR Code">QR / กระเป๋าเงินดิจิทัล</option>
-                                <option value="โอน">โอนผ่านธนาคาร</option>
                             </select>
+                        </div>
+
+                        <div id="qrCodeContainer" class="text-center mb-3" style="display: none; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid var(--glass-border);">
+                            <img id="dynamicQRCode" src="https://promptpay.io/0933201179.png" alt="PromptPay QR Code" style="max-width: 150px; border-radius: 10px; background: white; padding: 5px;">
+                            <p class="mt-2" style="font-size: 0.85rem; color: var(--cafe-gold); margin-bottom: 0;">สแกนเพื่อชำระเงิน (พร้อมเพย์)</p>
+                            <p class="text-muted" style="font-size: 0.7rem; margin-bottom: 0;">บัญชีร้าน: 093-320-1179</p>
                         </div>
 
                         <div id="discountDetails" class="mb-3 px-3 py-2 rounded-lg" style="font-size: 0.75rem; background: rgba(230,194,122,0.1); color: var(--cafe-gold); border-radius: 12px;">
@@ -543,6 +548,11 @@
             document.getElementById("discount").value = totalDiscount;
             document.getElementById("itemsInput").value = JSON.stringify(cart);
 
+            const dynamicQRCode = document.getElementById("dynamicQRCode");
+            if (dynamicQRCode) {
+                dynamicQRCode.src = finalTotal > 0 ? `https://promptpay.io/0933201179/${finalTotal}.png` : `https://promptpay.io/0933201179.png`;
+            }
+
             const detailsDiv = document.getElementById("discountDetails");
             detailsDiv.innerHTML = discountList.length > 0 ? discountList.join("<br>") : "<span class='opacity-50'>ไม่มีส่วนลดเพิ่มเติม</span>";
             document.getElementById("pointEarn").innerText = Math.floor(finalTotal / 20);
@@ -554,6 +564,14 @@
         });
 
 
+
+        function toggleQRCode() {
+            const method = document.getElementById("paymentMethod").value;
+            const qrContainer = document.getElementById("qrCodeContainer");
+            if (qrContainer) {
+                qrContainer.style.display = (method === "QR Code") ? "block" : "none";
+            }
+        }
 
         let currentPOSCategory = 'เมนูทั้งหมด';
         function setPOSCategory(cat) {
