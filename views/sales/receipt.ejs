@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<%- include('../partials/head.ejs', { title:'ใบเสร็จรับเงิน | Dome Noir' }) %>
+
+<style>
+    :root {
+        --cafe-gold: #E6C27A;
+        --cafe-dark-bg: #0d0d0d;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--cafe-dark-bg);
+        color: #eee;
+        padding-top: 50px;
+        min-height: 100vh;
+        background: radial-gradient(circle at top, #1a1a1a 0%, #0d0d0d 100%);
+    }
+
+    .receipt-card {
+        max-width: 450px;
+        margin: 0 auto;
+        background: #151515;
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .receipt-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, transparent, var(--cafe-gold), transparent);
+    }
+
+    .shop-logo {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .shop-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
+        color: var(--cafe-gold);
+        letter-spacing: 4px;
+        margin-bottom: 5px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .shop-address {
+        font-size: 0.75rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .receipt-divider {
+        border-top: 1px dashed rgba(255, 255, 255, 0.1);
+        margin: 25px 0;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        margin-bottom: 10px;
+        color: #888;
+    }
+
+    .item-list {
+        margin: 30px 0;
+    }
+
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .item-main {
+        flex: 1;
+    }
+
+    .item-name {
+        font-weight: 500;
+        color: #fff;
+        display: block;
+    }
+
+    .item-sub {
+        font-size: 0.7rem;
+        color: #666;
+    }
+
+    .item-price {
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        color: var(--cafe-gold);
+        margin-left: 20px;
+    }
+
+    .total-section {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+
+    .grand-total {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--cafe-gold);
+    }
+
+    .footer-note {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 0.8rem;
+        color: #555;
+        font-style: italic;
+    }
+
+    .btn-receipt {
+        border-radius: 12px;
+        padding: 12px 25px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        transition: all 0.3s;
+    }
+
+    .btn-print {
+        background: var(--cafe-gold);
+        color: #000;
+        border: none;
+    }
+
+    .btn-print:hover { background: #f0d49a; transform: scale(1.05); }
+
+    .btn-home {
+        background: transparent;
+        color: #888;
+        border: 1px solid var(--glass-border);
+        margin-left: 10px;
+        text-decoration: none !important;
+        display: inline-block;
+    }
+
+    .btn-home:hover { border-color: #fff; color: #fff; }
+
+    @media print {
+        body { background: white; color: black; padding: 0; }
+        .receipt-card { box-shadow: none; border: none; max-width: 100%; width: 100%; padding: 20px; }
+        .no-print { display: none !important; }
+        .receipt-card::before { display: none; }
+        .shop-name, .item-price, .grand-total { color: black !important; }
+        .info-row, .item-sub, .footer-note { color: #555 !important; }
+    }
+</style>
+
+<body>
+    <div class="container pb-5">
+        <div class="receipt-card">
+            <div class="shop-logo">
+                <div class="shop-name">Dome Noir</div>
+                <div class="shop-address">Signature Specialty Coffee & Bakery</div>
+            </div>
+
+            <div class="info-row">
+                <span>เลขที่ใบเสร็จ:</span>
+                <span class="text-white"><%= sale._id.toString().toUpperCase().slice(-8) %></span>
+            </div>
+            <div class="info-row">
+                <span>วันที่:</span>
+                <span class="text-white"><%= new Date(sale.date).toLocaleString('th-TH') %></span>
+            </div>
+            <div class="info-row">
+                <span>ชำระโดย:</span>
+                <span class="badge" style="background: rgba(230,194,122,0.1); color: var(--cafe-gold);"><%= sale.paymentMethod %></span>
+            </div>
+
+            <div class="receipt-divider"></div>
+
+            <div class="item-list">
+                <% sale.items.forEach(item => { %>
+                <div class="item-row">
+                    <div class="item-main">
+                        <span class="item-name"><%= item.productName %> x <%= item.quantity %></span>
+                        <span class="item-sub">ความหวาน: <%= item.sweetness %></span>
+                    </div>
+                    <div class="item-price">฿<%= (item.price * item.quantity).toLocaleString() %></div>
+                </div>
+                <% }) %>
+            </div>
+
+            <div class="total-section">
+                <div class="summary-row">
+                    <span class="text-muted">ยอดรวมสินค้า</span>
+                    <span>฿<%= (sale.totalPrice + sale.discount).toLocaleString() %></span>
+                </div>
+                <div class="summary-row text-danger">
+                    <span>ส่วนลดทั้งหมด</span>
+                    <span>-฿<%= sale.discount.toLocaleString() %></span>
+                </div>
+                <div class="grand-total">
+                    <span>ยอดชำระสุทธิ</span>
+                    <span>฿<%= sale.totalPrice.toLocaleString() %></span>
+                </div>
+            </div>
+
+            <% if(sale.member) { %>
+            <div class="receipt-divider"></div>
+            <div class="text-center small">
+                <div style="color: var(--cafe-gold); font-weight: 600; letter-spacing: 1px;">คะแนนสะสม</div>
+                <div class="text-muted mt-1">ได้รับเพิ่ม +<%= Math.floor(sale.totalPrice / 20) %> คะแนน</div>
+            </div>
+            <% } %>
+
+            <div class="footer-note">
+                ขอบคุณที่ใช้บริการ Dome Noir
+                <br>Have a delightful coffee day!
+            </div>
+        </div>
+
+        <div class="text-center mt-5 no-print">
+            <button onclick="window.print()" class="btn btn-receipt btn-print px-5">
+                <i class="fas fa-print mr-2"></i> สั่งพิมพ์ใบเสร็จ
+            </button>
+            <a href="/sales/new" class="btn btn-receipt btn-home px-5">
+                กลับหน้าขาย (POS)
+            </a>
+        </div>
+    </div>
+</body>
+</html>

@@ -94,7 +94,7 @@ exports.insertSale = async (req, res) => {
 
         }
 
-        res.redirect("/sales/all");
+        res.redirect("/sales/receipt/" + sale._id);
 
     } catch (err) {
 
@@ -178,4 +178,22 @@ exports.showSales = async (req, res) => {
 
     }
 
+};
+
+/* =========================
+   GET ORDER RECEIPT
+========================= */
+exports.getReceipt = async (req, res) => {
+    try {
+        const sale = await Sale.findById(req.params.id).populate("member");
+        if (!sale) return res.redirect("/sales/new");
+
+        res.render("sales/receipt", {
+            sale,
+            user: req.session.user
+        });
+    } catch (err) {
+        console.log(err);
+        res.redirect("/sales/new");
+    }
 };
