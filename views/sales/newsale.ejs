@@ -234,6 +234,32 @@
         padding-top: 15px;
         border-top: 1px dashed var(--glass-border);
     }
+
+    /* Out of Stock Styling */
+    .pos-card.sold-out {
+        opacity: 0.5;
+        cursor: not-allowed;
+        filter: grayscale(0.8);
+        position: relative;
+    }
+
+    .sold-out-banner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-15deg);
+        background: #ef4444;
+        color: #fff;
+        padding: 5px 20px;
+        font-weight: 700;
+        font-size: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        z-index: 2;
+        pointer-events: none;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
 </style>
 
 <body>
@@ -267,14 +293,19 @@
 
                     <div class="product-grid" id="posProductMenu">
                         <% products.forEach(product=>{ %>
-                        <div class="pos-card menu-item" id="menu-item-<%= product._id %>" 
+                        <div class="pos-card menu-item <%= product.status === 'หมด' ? 'sold-out' : '' %>" id="menu-item-<%= product._id %>" 
                              data-category="<%= product.category %>" 
                              data-popular="<%= popularIds.includes(product._id.toString()) ? 'true' : 'false' %>"
                              data-id="<%= product._id %>"
                              data-name="<%= product.name %>"
                              data-image="<%= product.image %>"
                              data-price="<%= product.price %>"
+                             data-status="<%= product.status %>"
                              onclick="handleItemClick(this)">
+                            
+                            <% if(product.status === 'หมด'){ %>
+                                <div class="sold-out-banner">หมด</div>
+                            <% } %>
                             
                             <img src="/images/products/<%= product.image %>">
                             <div class="pos-card-info">
@@ -411,6 +442,9 @@
 
         function handleItemClick(el) {
             const d = el.dataset;
+            if (d.status === 'หมด') {
+                return; // Do nothing if sold out
+            }
             addToCart(d.id, d.name, d.image, parseFloat(d.price), d.category);
         }
 

@@ -65,6 +65,7 @@ router.post('/insert', auth.isAdmin, upload.single("image"), async (req, res) =>
         name: req.body.name,
         price: req.body.price,
         category: req.body.category,
+        status: req.body.status || "พร้อมขาย",
         image: req.file ? req.file.filename : "default.jpg"
     });
 
@@ -87,7 +88,8 @@ router.post('/update', auth.isAdmin, upload.single("image"), async (req, res) =>
     const data = {
         name: req.body.name,
         price: req.body.price,
-        category: req.body.category
+        category: req.body.category,
+        status: req.body.status
     };
 
     if (req.file) data.image = req.file.filename;

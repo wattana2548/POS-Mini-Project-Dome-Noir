@@ -231,6 +231,29 @@
             bottom: 20px;
             opacity: 1;
         }
+
+        /* Sold Out Styling for Index */
+        .card-img-container.sold-out {
+            filter: grayscale(0.8);
+            opacity: 0.6;
+        }
+
+        .sold-out-tag {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            background: #ef4444;
+            color: #fff;
+            padding: 5px 15px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 5;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 
@@ -340,9 +363,10 @@
                 const card = `
                     <div class="product-card-wrapper position-relative">
                         <div class="clean-card h-100">
-                            <div class="card-img-container position-relative">
+                            <div class="card-img-container position-relative ${p.status === 'หมด' ? 'sold-out' : ''}">
+                                ${p.status === 'หมด' ? '<div class="sold-out-tag">สินค้าหมด</div>' : ''}
                                 <img src="/images/products/${p.image}" alt="${p.name}">
-                                ${userLoggedIn ? `
+                                ${userLoggedIn && p.status !== 'หมด' ? `
                                 <div class="order-btn-overlay">
                                     <a href="/sales/new?product_id=${p._id}" class="btn btn-warning rounded-pill px-4">สั่งเลย</a>
                                 </div>` : ''}

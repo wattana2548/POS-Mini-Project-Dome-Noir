@@ -189,9 +189,17 @@
                             </select>
                         </div>
 
-                        <div class="mb-5">
+                        <div class="mb-4">
                             <label class="form-label">ราคาต่อหน่วย (บาท)</label>
                             <input type="number" name="price" class="form-control" placeholder="0.00" required>
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form-label">สถานะสินค้า</label>
+                            <select name="status" class="form-select" required>
+                                <option value="พร้อมขาย" selected>พร้อมขาย (Available)</option>
+                                <option value="หมด">หมด (Out of Stock)</option>
+                            </select>
                         </div>
                     </div>
 

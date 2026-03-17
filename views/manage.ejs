@@ -234,6 +234,7 @@
                             <th class="text-left" style="padding-left: 25px;">สินค้า</th>
                             <th class="text-left">หมวดหมู่</th>
                             <th class="text-center">ราคาต่อหน่วย</th>
+                            <th class="text-center">สถานะ</th>
                             <th class="text-center">การจัดการ</th>
                         </tr>
                     </thead>
@@ -251,6 +252,13 @@
                             </td>
                             <td class="text-center price">
                                 <span class="price-tag">฿<%= item.price.toLocaleString() %></span>
+                            </td>
+                            <td class="text-center">
+                                <% if(item.status === 'พร้อมขาย'){ %>
+                                    <span class="badge badge-success" style="background: rgba(40, 167, 69, 0.1); color: #28a745; border: 1px solid rgba(40, 167, 69, 0.2); border-radius: 8px; padding: 5px 10px;">พร้อมขาย</span>
+                                <% } else { %>
+                                    <span class="badge badge-danger" style="background: rgba(220, 53, 69, 0.1); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.2); border-radius: 8px; padding: 5px 10px;">หมด</span>
+                                <% } %>
                             </td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-2" style="gap: 12px;">
