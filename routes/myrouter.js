@@ -166,16 +166,19 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/dashboard", auth.isLogin, async (req, res) => {
-
     try {
+        // --- RANGE SELECTOR ---
+        const range = parseInt(req.query.range) || 7; // Default 7 days
+        const labelsCount = range; // for Chart labels loop
+
         // วันนี้ (เริ่มเที่ยงคืน)
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // วันนี้เมื่อ 7 วันก่อน
-        const past7Days = new Date();
-        past7Days.setDate(today.getDate() - 6);
-        past7Days.setHours(0, 0, 0, 0);
+        // วันเริ่มที่ต้องการดึงข้อมูล
+        const pastDate = new Date();
+        pastDate.setDate(today.getDate() - (range - 1));
+        pastDate.setHours(0, 0, 0, 0);
 
         // 1) สรุปยอดขายวันนี้ & จำนวนออเดอร์ & จำนวนลูกค้า
         const todaySales = await Sale.aggregate([
@@ -196,9 +199,9 @@ router.get("/dashboard", auth.isLogin, async (req, res) => {
             distinctCustomers: todaySales.length > 0 ? (todaySales[0].customers.filter(c => c !== null).length) : 0
         };
 
-        // 2) กราฟยอดขาย 7 วันล่าสุด (Sales Graph)
+        // 2) กราฟยอดขายตามช่วงเวลา (Sales Graph)
         const chartData = await Sale.aggregate([
-            { $match: { date: { $gte: past7Days } } },
+            { $match: { date: { $gte: pastDate } } },
             {
                 $group: {
                     _id: {
@@ -210,10 +213,10 @@ router.get("/dashboard", auth.isLogin, async (req, res) => {
             { $sort: { "_id": 1 } }
         ]);
 
-        // จัดการชุดข้อมูลให้ครบ 7 วัน (เผื่อบางวันขายไม่ได้เลย)
+        // จัดการชุดข้อมูลตาม Range (เผื่อบางวันขายไม่ได้เลย)
         let labels = [];
         let dataIndex = [];
-        for(let i=6; i>=0; i--) {
+        for(let i=(range-1); i>=0; i--) {
             let d = new Date();
             d.setDate(d.getDate() - i);
             let dateStr = d.toISOString().split('T')[0];
@@ -250,7 +253,8 @@ router.get("/dashboard", auth.isLogin, async (req, res) => {
             chartLabels: JSON.stringify(labels),
             chartData: JSON.stringify(dataIndex),
             recentSales,
-            topProducts
+            topProducts,
+            range
         });
 
     } catch (err) {

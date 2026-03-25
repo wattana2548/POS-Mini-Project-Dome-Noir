@@ -226,8 +226,15 @@
         <!-- Sales Chart -->
         <div class="col-lg-8">
             <div class="section-box">
-                <div class="section-title">
-                    แนวโน้มรายได้ (7 วันล่าสุด)
+                <div class="section-title d-flex justify-content-between align-items-center">
+                    <span>
+                        แนวโน้มรายได้ (<%= range %> วันล่าสุด)
+                    </span>
+                    <div class="btn-group btn-group-sm">
+                        <a href="/dashboard?range=7" class="btn btn-outline-secondary <%= range == 7 ? 'active' : '' %>" style="border-radius: 10px 0 0 10px; font-size: 0.7rem; padding: 5px 12px; border-color: var(--glass-border); color: <%= range == 7 ? '#000' : '#888' %>; background: <%= range == 7 ? 'var(--cafe-gold)' : 'transparent' %>">7 วัน</a>
+                        <a href="/dashboard?range=15" class="btn btn-outline-secondary <%= range == 15 ? 'active' : '' %>" style="font-size: 0.7rem; padding: 5px 12px; border-color: var(--glass-border); color: <%= range == 15 ? '#000' : '#888' %>; background: <%= range == 15 ? 'var(--cafe-gold)' : 'transparent' %>">15 วัน</a>
+                        <a href="/dashboard?range=30" class="btn btn-outline-secondary <%= range == 30 ? 'active' : '' %>" style="border-radius: 0 10px 10px 0; font-size: 0.7rem; padding: 5px 12px; border-color: var(--glass-border); color: <%= range == 30 ? '#000' : '#888' %>; background: <%= range == 30 ? 'var(--cafe-gold)' : 'transparent' %>">30 วัน</a>
+                    </div>
                 </div>
                 <div style="height: 350px;">
                     <canvas id="salesChart"></canvas>
@@ -322,9 +329,16 @@
     const rawLabels = <%- chartLabels %>;
     const rawData = <%- chartData %>;
 
-    const formattedLabels = rawLabels.map(d => {
+    const formattedLabels = rawLabels.map((d, idx) => {
         let parts = d.split('-');
         const date = new Date(parts[0], parts[1]-1, parts[2]);
+        const range = <%= range %>;
+        
+        // ถ้าดูหลายวัน (เช่น 30 วัน) ให้แสดง label เว้นช่วงเพื่อไม่ให้แออัด
+        if (range > 15 && idx % 3 !== 0 && idx !== rawLabels.length - 1) {
+            return "";
+        }
+        
         return date.toLocaleDateString('th-TH', { day: '2-digit', month: 'short' });
     });
 
