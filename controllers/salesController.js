@@ -69,7 +69,8 @@ exports.insertSale = async (req, res) => {
             totalPrice: finalTotal,
             discount,
             paymentMethod,
-            member: member || null
+            member: member || null,
+            employee: req.session.user ? req.session.user._id : null
         });
 
         await sale.save();

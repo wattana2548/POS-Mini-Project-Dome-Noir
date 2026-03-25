@@ -1,5 +1,5 @@
 const Member = require('../models/members');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 // ================= SHOW PAGE =================
 exports.showAddEmployee = (req, res) => {
