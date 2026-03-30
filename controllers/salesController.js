@@ -2,179 +2,134 @@ const Product = require("../models/products");
 const Customer = require("../models/customers");
 const Sale = require("../models/sales");
 
-
-/* =========================
-   OPEN POS PAGE (เปิดหน้าการขาย)
-   [อธิบาย: โหลดข้อมูลสินค้าและสมาชิกเพื่อเตรียมขาย]
-========================= */
 exports.newSale = async (req, res) => {
-
     try {
-
-        // ดึงข้อมูลสินค้าและสมาชิกทั้งหมดจากฐานข้อมูล
+        // ดึงข้อมูลสินค้าทั้งหมดจาก Collection 'Product' เพื่อไปแสดงในหน้า POS
         const products = await Product.find();
+        // ดึงข้อมูลสมาชิก (Member) ทั้งหมดเพื่อใช้สำหรับการเลือกชื่อสมาชิกและดูแต้มสะสม
         const members = await Customer.find();
 
-        // คำนวณหาสินค้าที่เป็นที่นิยม (Top 10) โดยใช้ Aggregation
-        const popularProducts = await Sale.aggregate([
-            { $unwind: "$items" }, // กระจายอาร์เรย์สินค้า
-            { $group: { _id: "$items.product", count: { $sum: "$items.quantity" } } }, // นับจำนวนที่ขายได้
-            { $sort: { count: -1 } }, // เรียงลำดับจากมากไปน้อย
-            { $limit: 10 } // เอาแค่ 10 อันแรก
+        // ส่วนการวิเคราะห์หาสินค้าขายดี (Popular Menu) แบบ Real-time ด้วย Aggregation
+        const popularResult = await Sale.aggregate([
+            { $unwind: "$items" }, //จะกระจายรายการสินค้าในอาร์เรย์ (items) ออกมาเป็นแถวเดี่ยว
+            { $group: { _id: "$items.product", count: { $sum: "$items.quantity" } } }, //ตามไอดีสินค้าและนับจำนวนหน่วย (quantity) ที่ขายได้รวมกัน
+            { $sort: { count: -1 } }, //เรียงลำดับข้อมูลจากมากที่สุดไปหาน้อยที่สุด (-1)
+            { $limit: 10 } //เอาเฉพาะ 10 รายการแรกเพื่อนำไปติดป้าย "ยอดนิยม" ในหน้าเว็บ
         ]);
-        const popularIds = popularProducts.map(p => p._id ? p._id.toString() : "");
 
-        // เรนเดอร์หน้า newsale พร้อมส่งข้อมูลไปแสดงผล
+        // แปลงผลลัพธ์ที่ได้จากการ Aggregate ให้เป็น Array ของ ID สินค้าในรูปแบบสตริง
+        const popularIds = popularResult.map(item => item._id.toString());
+
+        // ส่งข้อมูลทั้งหมดไปเรนเดอร์หน้า POS (newsale)
         res.render("sales/newsale", {
-            user: req.session.user,
-            products,
-            members,
-            popularIds
+            productsLabel: products,
+            products: products,
+            members: members,
+            popularIds: popularIds,
+            user: req.session.user
         });
 
     } catch (err) {
-
         console.log(err);
-        res.send("POS Error");
-
+        res.send("New Sale Error");
     }
-
 };
 
-
-
-/* =========================
-   INSERT SALE (บันทึกการขาย) 
-   [ส่วนนี้คือหัวใจของ POS ใช้บันทึกออเดอร์และจัดการแต้มสมาชิก]
-========================= */
-console.log("INSERT SALE WORKING");
 exports.insertSale = async (req, res) => {
-
     try {
-        // 1. รับข้อมูลจากหน้าบ้าน (Frontend)
-        const {
-            items,          // รายการสินค้า (JSON string)
-            totalPrice,     // ราคารวม
-            discount,       // ส่วนลด
-            paymentMethod,  // วิธีชำระเงิน
-            member,         // ID สมาชิก (ถ้ามี)
-            usePoint        // จำนวนแต้มที่ใช้ลดราคา
-        } = req.body;
-
-        // แปลงข้อมูลสินค้าจาก String กลับเป็น Array Object
+        // รับค่าข้อมูลจากการส่งฟอร์ม (req.body) ทั้งราคารวม, ส่วนลด, ช่องทางการชำระเงิน และไอดีสมาชิก
+        const { items, totalPrice, discount, paymentMethod, member, usePoint } = req.body;
+        // แปลงข้อมูลรายการสินค้า (items) จากรูปแบบ JSON String ให้กลายเป็น Javascript Object เพื่อประมวลผล
         const parsedItems = items ? JSON.parse(items) : [];
-
         const finalTotal = Number(totalPrice);
         const usedPoint = Number(usePoint) || 0;
 
-
-        // 2. บันทึกข้อมูลการขายลง Collection 'Sale'
+        // 1. สร้างเอกสารการขายใหม่ (New Sale Instance)
         const sale = new Sale({
             items: parsedItems,
             totalPrice: finalTotal,
             discount,
             paymentMethod,
             member: member || null,
-            // เก็บ ID ของพนักงานที่ล็อกอินอยู่
-            employee: req.session.user ? req.session.user._id : null
+            employee: req.session.user ? req.session.user._id : null 
         });
+        await sale.save(); // บันทึกข้อมูลใบเสร็จลงใน Database
 
-        await sale.save(); // บันทึกลง Database
-
-
-        // 3. ระบบจัดการแต้มสมาชิก (Point System)
+        // 2. ระบบจัดการแต้มสมาชิก (Member Point Logic)
         if (member) {
-
-            // กรณีมีการใช้แต้ม (Redeem) -> ทำการลดแต้มใน Database
+            // กรณีใช้แต้มแลกส่วนลด: ใช้คำสั่ง $inc (Increment) ด้วยค่าติดลบเพื่อ "ลด" จำนวนแต้มในเครื่องสมาชิก
             if (usedPoint > 0) {
                 await Customer.findByIdAndUpdate(member, {
-                    $inc: { point: -usedPoint } // $inc ติดลบคือการลดค่า
+                    $inc: { point: -usedPoint } 
                 });
             }
 
-            // กรณีได้แต้มใหม่ (Earn) -> ทุกๆ 20 บาท ได้ 1 แต้ม
-            const earnPoint = Math.floor(finalTotal / 20);
-
+            // กรณีการสะสมแต้มใหม่: ทุกๆ 20 บาทจะได้รับ 1 แต้ม (ใช้ Math.floor เพื่อปัดเศษลง)
+            const earnPoint = Math.floor(alTotal / 20);fin
             await Customer.findByIdAndUpdate(member, {
-                $inc: { point: earnPoint } // $inc เป็นบวกคือการเพิ่มค่า
+                $inc: { point: earnPoint } // ใช้ $inc ด้วยค่าบวกเพื่อ "เพิ่ม" แต้มสะสม
             });
-
         }
 
-        // เมื่อบันทึกเสร็จ ให้ Redirect ไปยังหน้าใบเสร็จ
+        // เมื่อบันทึกเสร็จ ให้ส่งหน้าเว็บไปยังใบเสร็จ
         res.redirect("/sales/receipt/" + sale._id);
 
     } catch (err) {
-
         console.log(err);
         res.send("Insert Sale Error");
-
     }
-
 };
 
-
-/* =========================
-   SHOW SALES HISTORY (แสดงประวัติการขาย)
-   [อธิบาย: ดึงรายชื่อการขายทั้งหมดมาแสดง และทำระบบ Filter ตามวันที่]
-========================= */
 exports.showSales = async (req, res) => {
 
     try {
-        // รับค่าวันที่จาก Query String
+        // รับค่าวันที่เริ่มต้น (startDate) และวันที่สิ้นสุด (endDate) จาก Query String สำหรับการทำระบบ Filter
         let { startDate, endDate } = req.query;
         let dateFilter = {};
 
-        // ถ้ามีการระบุวันที่ ให้ทำการสร้าง Filter เพื่อไป Query ฐานข้อมูล
+        // หากมีการระบุวันที่ค้นหา: ทำการสร้างเงื่อนไขช่วงเวลา (Range Filter)
         if (startDate && endDate) {
-            // ปรับเวลาให้ครอบคลุมทั้งวัน (00:00 - 23:59)
             const start = new Date(startDate);
-            start.setHours(0, 0, 0, 0);
+            start.setHours(0, 0, 0, 0); // กำหนดเวลาเริ่มต้นที่ 00:00:00.000 เพื่อครอบคลุมทั้งวัน
 
             const end = new Date(endDate);
-            end.setHours(23, 59, 59, 999);
+            end.setHours(23, 59, 59, 999); // กำหนดเวลาสิ้นสุดที่ 23:59:59.999 เพื่อครอบคลุมทั้งวัน
 
+            // ใช้เงื่อนไข $gte (Greater than or Equal) และ $lte (Less than or Equal) ในการค้นหาช่วงวันที่
             dateFilter = {
-                date: {
-                    $gte: start,
-                    $lte: end
-                }
+                date: { $gte: start, $lte: end }
             };
         } else {
-            // ถ้าไม่ระบุ ให้ Default เป็นยอดขายของ "วันนี้"
+            // หากไม่ระบุวันที่: ระบบจะ Default ให้แสดงเฉพาะยอดขายที่มีวันที่ตั้งแต่ต้น "วันนี้" เป็นต้นไป
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            dateFilter = {
-                date: { $gte: today }
-            };
+            dateFilter = { date: { $gte: today } };
             
-            // กำหนดค่าเริ่มต้นให้กับหน้าจอ Input วันที่
+            // กำหนดค่าเริ่มต้นให้กับกล่องเลือกวันที่ในหน้า View
             startDate = startDate || today.toISOString().split('T')[0];
             endDate = endDate || new Date().toISOString().split('T')[0];
         }
 
-        // ดึงข้อมูลการขาย พร้อม Populate (เติมข้อมูลอัตโนมัติ) ของสมาชิกและพนักงานที่ขาย
+        // ดึงข้อมูลการขาย พร้อมใช้ 'Populate' เพื่อนำชื่อสมาชิกและพนักงานไปโชว์ในตารางประวัติ
         const sales = await Sale
             .find(dateFilter)
             .populate("member")
             .populate("employee")
-            .sort({ date: -1 });
+            .sort({ date: -1 }); // เรียงลำดับจากรายการล่าสุดก่อน (Latest First)
 
-        // คำนวณยอดเงินรวมและจำนวนออเดอร์ตามช่วงวันที่ Filter โดยใช้ Aggregate
+        // ใช้ Aggregation เพื่อสรุปยอดรายได้รวม (TotalPrice) และนับจำนวนรายการออเดอร์ตามเงื่อนไข Filter
         const summaryResults = await Sale.aggregate([
-            {
-                $match: dateFilter
-            },
-            {
-                $group: {
-                    _id: null,
-                    total: { $sum: "$totalPrice" },
-                    count: { $sum: 1 }
-                }
+            { $match: dateFilter }, // กรองเฉพาะรายการที่ตรงตามเงื่อนไขวันที่
+            { 
+                $group: { 
+                    _id: null, 
+                    total: { $sum: "$totalPrice" }, // รวมผลรวมของฟิลด์ totalPrice
+                    count: { $sum: 1 } // นับผลรวมรายการ (จำนวนบรรทัด)
+                } 
             }
         ]);
 
-        // เรนเดอร์หน้า showsale
+        // เรนเดอร์หน้าประวัติการขาย (showsale)
         res.render("sales/showsale", {
             sales: sales,
             summary: summaryResults[0] || { total: 0, count: 0 },
@@ -192,17 +147,13 @@ exports.showSales = async (req, res) => {
 
 };
 
-/* =========================
-   GET ORDER RECEIPT (พิมพ์ใบเสร็จ)
-   [อธิบาย: ดึงข้อมูลการขายแต่ละออเดอร์มาแสดงในรูปแบบใบเสร็จ]
-========================= */
 exports.getReceipt = async (req, res) => {
     try {
-        // ค้นหาการขายด้วย ID และดึงข้อมูลสมาชิกมาด้วย
+       
         const sale = await Sale.findById(req.params.id).populate("member");
         if (!sale) return res.redirect("/sales/new");
 
-        // เรนเดอร์หน้าใบเสร็จ
+        
         res.render("sales/receipt", {
             sale,
             user: req.session.user

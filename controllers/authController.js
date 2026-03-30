@@ -24,7 +24,7 @@ exports.login = async (req, res) => {
             });
         }
 
-        // ✅ สร้าง session
+        // สร้าง session
         req.session.user = user;
 
         res.redirect('/dashboard');
